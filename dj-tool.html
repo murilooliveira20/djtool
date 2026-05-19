@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0a0a0a">
+<title>DJ TOOL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Unbounded:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --panel: #111;
+    --panel-2: #161616;
+    --border: #222;
+    --border-2: #2a2a2a;
+    --text: #e8e8e8;
+    --text-dim: #888;
+    --text-mute: #555;
+    --accent: #C6FF00;
+    --accent-dim: #8aaf00;
+    --red: #ff3344;
+    --orange: #ff9030;
+    --blue: #30aaff;
+    --purple: #b060ff;
+    --mono: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
+    --display: 'Unbounded', sans-serif;
+  }
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+    user-select: none;
+    -webkit-user-select: none;
+    overscroll-behavior: none;
+  }
+  
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    padding: 6px;
+    gap: 6px;
+  }
+  
+  /* ============ HEADER ============ */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand-mark {
+    width: 18px;
+    height: 18px;
+    background: var(--accent);
+    border-radius: 2px;
+    position: relative;
+  }
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    background: var(--bg);
+    border-radius: 1px;
+  }
+  .brand h1 {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .brand h1 span { color: var(--accent); }
+  .header-info {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .info-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #333;
+    transition: background 0.2s;
+  }
+  .status-dot.active {
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+  
+  /* ============ TABS ============ */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+  }
+  .tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    padding: 8px 4px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+    touch-action: manipulation;
+  }
+  .tab:active { transform: scale(0.97); }
+  .tab.active {
+    background: var(--accent);
+    color: #000;
+  }
+  
+  /* ============ TAB CONTENT ============ */
+  .tab-content {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .tab-content.active { display: flex; }
+  
+  /* ============ ANALYZER TAB ============ */
+  .top-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+  .metric-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px 8px;
+    text-align: center;
+  }
+  .metric-label {
+    font-size: 8px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 3px;
+  }
+  .metric-value {
+    font-size: 18px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--text);
+    line-height: 1;
+  }
+  .metric-value.over { color: var(--red); }
+  .metric-value.warn { color: var(--orange); }
+  .metric-target {
+    font-size: 9px;
+    color: var(--text-mute);
+    margin-top: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+  
+  #spectrum-container {
+    flex: 1;
+    background: #0d0d0d;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+  #spectrum { width: 100%; height: 100%; display: block; }
+  
+  .bands-row {
+    display: grid;
+    gap: 4px;
+  }
+  .bands-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .bands-row.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  
+  .band {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 6px;
+  }
+  .band-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .band-name { font-weight: 700; }
+  .band-freq { color: var(--text-mute); }
+  .band-meter {
+    height: 16px;
+    background: var(--panel-2);
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+  }
+  .band-fill {
+    height: 100%;
+    width: 0%;
+    transition: width 0.05s linear;
+    border-radius: 2px;
+  }
+  .band-target-line {
+    position: absolute;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    background: #fff;
+    box-shadow: 0 0 4px #fff;
+    transition: left 0.2s ease;
+    display: none;
+  }
+  .band-target-line.active { display: block; }
+  .band-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+    margin-top: 3px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .band-current { color: var(--text); font-weight: 700; }
+  .band-delta.over { color: #ff6060; }
+  .band-delta.under { color: #60aaff; }
+  .band-delta.match { color: var(--accent); }
+  
+  .stereo-meter {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 2px 0;
+  }
+  .stereo-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 8px;
+  }
+  .stereo-label { width: 8px; color: var(--text-dim); font-weight: 700; }
+  .stereo-bar {
+    flex: 1;
+    height: 5px;
+    background: var(--panel-2);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .stereo-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #60ff60 0%, #ffaa00 70%, #ff3030 90%);
+    width: 0%;
+    transition: width 0.05s linear;
+  }
+  
+  /* ============ CONTROLS ============ */
+  .controls {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 6px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+  }
+  .btn {
+    background: var(--panel-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    padding: 7px 10px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.12s;
+    touch-action: manipulation;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .btn.danger { border-color: var(--red); color: #ff7080; }
+  .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+  
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel-2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-2);
+  }
+  .control-label {
+    font-size: 8px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  input[type="range"] {
+    width: 70px;
+    height: 4px;
+    background: var(--border-2);
+    border-radius: 2px;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--accent);
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+  }
+  .slider-value {
+    font-size: 10px;
+    color: var(--accent);
+    min-width: 32px;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+  }
+  
+  /* ============ BPM TAB ============ */
+  .bpm-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    min-height: 0;
+  }
+  .bpm-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-title {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  
+  .bpm-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .bpm-big {
+    font-family: var(--display);
+    font-size: clamp(48px, 14vw, 96px);
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 0.9;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 30px rgba(198, 255, 0, 0.3);
+  }
+  .bpm-unit {
+    font-size: 11px;
+    color: var(--text-mute);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+  .bpm-confidence {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .bpm-confidence-bar {
+    width: 60px;
+    height: 4px;
+    background: var(--panel-2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .bpm-confidence-fill {
+    height: 100%;
+    background: var(--accent);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  
+  .bpm-alternatives {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+    font-size: 10px;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .bpm-alt {
+    padding: 4px 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border-2);
+    border-radius: 3px;
+  }
+  .bpm-alt span { color: var(--text); font-weight: 600; }
+  
+  .tap-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+  }
+  .tap-pad {
+    width: 100%;
+    max-width: 220px;
+    aspect-ratio: 1;
+    background: var(--panel-2);
+    border: 2px solid var(--border-2);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.08s;
+    position: relative;
+    touch-action: manipulation;
+  }
+  .tap-pad:active, .tap-pad.tapped {
+    background: var(--accent);
+    border-color: var(--accent);
+    transform: scale(0.96);
+    box-shadow: 0 0 40px rgba(198, 255, 0, 0.5);
+  }
+  .tap-pad:active .tap-label, .tap-pad.tapped .tap-label {
+    color: #000;
+  }
+  .tap-label {
+    font-family: var(--display);
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--text);
+    transition: color 0.08s;
+  }
+  .tap-info {
+    display: flex;
+    gap: 16px;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .tap-info span { color: var(--accent); font-weight: 700; }
+  
+  .bpm-controls {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .bpm-utils {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    font-size: 10px;
+  }
+  .util-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  .util-label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; font-size: 9px; }
+  .util-value { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
+  
+  /* ============ HARMONIC TAB ============ */
+  .harmonic-layout {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 6px;
+    min-height: 0;
+  }
+  .harmonic-controls-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+  }
+  .harmonic-display-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  
+  .key-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .key-selector-row {
+    display: flex;
+    gap: 6px;
+  }
+  .key-input {
+    flex: 1;
+    background: var(--panel-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    padding: 12px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .key-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  
+  .notation-toggle {
+    display: flex;
+    gap: 2px;
+    background: var(--panel-2);
+    padding: 3px;
+    border-radius: 4px;
+    border: 1px solid var(--border-2);
+  }
+  .notation-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    padding: 6px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+  }
+  .notation-btn.active {
+    background: var(--accent);
+    color: #000;
+  }
+  
+  .key-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+  }
+  .key-cell {
+    background: var(--panel-2);
+    border: 1px solid var(--border-2);
+    color: var(--text);
+    padding: 8px 4px;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.1s;
+    touch-action: manipulation;
+  }
+  .key-cell.minor { color: var(--blue); }
+  .key-cell.major { color: var(--orange); }
+  .key-cell:active { transform: scale(0.95); }
+  .key-cell.selected {
+    background: var(--accent);
+    color: #000 !important;
+    border-color: var(--accent);
+  }
+  
+  .compatibility-display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    overflow-y: auto;
+  }
+  
+  .current-key-display {
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(198,255,0,0.08), rgba(198,255,0,0.02));
+    border: 1px solid rgba(198,255,0,0.2);
+    border-radius: 6px;
+  }
+  .current-key-camelot {
+    font-family: var(--display);
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .current-key-musical {
+    font-size: 14px;
+    color: var(--text);
+    margin-top: 4px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+  .current-key-label {
+    font-size: 9px;
+    color: var(--text-mute);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-top: 6px;
+  }
+  
+  .compat-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .compat-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .compat-section-title::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .compat-section-title.warm::before { background: var(--orange); }
+  .compat-section-title.bold::before { background: var(--purple); }
+  .compat-section-title.risk::before { background: var(--red); }
+  
+  .compat-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 4px;
+  }
+  .compat-item {
+    background: var(--panel-2);
+    border: 1px solid var(--border-2);
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.12s;
+    touch-action: manipulation;
+  }
+  .compat-item:active { transform: scale(0.97); }
+  .compat-item:hover { border-color: var(--accent); }
+  .compat-item-camelot {
+    font-family: var(--display);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .compat-item-musical {
+    font-size: 10px;
+    color: var(--text);
+    margin-top: 2px;
+    font-weight: 600;
+  }
+  .compat-item-desc {
+    font-size: 8px;
+    color: var(--text-mute);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* ============ START OVERLAY ============ */
+  .start-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 24px;
+    text-align: center;
+  }
+  .start-logo {
+    font-family: var(--display);
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .start-logo span { color: var(--accent); }
+  .start-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+  .start-features {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 36px;
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .start-feature {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .start-feature-icon {
+    font-size: 14px;
+    color: var(--accent);
+    font-family: var(--display);
+    font-weight: 800;
+  }
+  .start-msg {
+    color: var(--text-dim);
+    font-size: 11px;
+    line-height: 1.6;
+    max-width: 340px;
+    margin-bottom: 28px;
+  }
+  .start-btn {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 16px 40px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .start-btn-secondary {
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border-2);
+    margin-top: 10px;
+  }
+  
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 720px) {
+    .top-row { grid-template-columns: repeat(3, 1fr); }
+    .top-row .metric-card:nth-child(4),
+    .top-row .metric-card:nth-child(5) { grid-column: span 1; }
+    .metric-value { font-size: 14px; }
+    .bpm-layout { grid-template-columns: 1fr; }
+    .harmonic-layout { grid-template-columns: 1fr; }
+    .harmonic-controls-panel { max-height: 45%; }
+    .controls { gap: 3px; }
+    .btn { padding: 6px 8px; font-size: 8px; }
+    input[type="range"] { width: 60px; }
+    .control-group { padding: 3px 6px; }
+    .start-features { gap: 16px; }
+  }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="start-overlay" id="startOverlay">
+  <div class="start-logo">DJ <span>TOOL</span></div>
+  <div class="start-sub">Booth Companion · v1.0</div>
+  
+  <div class="start-features">
+    <div class="start-feature">
+      <div class="start-feature-icon">◉</div>
+      <div>Analyzer</div>
+    </div>
+    <div class="start-feature">
+      <div class="start-feature-icon">♪</div>
+      <div>BPM</div>
+    </div>
+    <div class="start-feature">
+      <div class="start-feature-icon">♯</div>
+      <div>Harmonic</div>
+    </div>
+  </div>
+  
+  <p class="start-msg">Smaart-style spectrum analyzer con target del track anterior, detector de BPM (auto + tap tempo), y mezcla armónica en Camelot y cifrado americano.</p>
+  <button class="start-btn" id="startBtn">Iniciar con Audio</button>
+  <button class="start-btn start-btn-secondary" id="startNoAudioBtn">Solo BPM/Harmonic (sin mic)</button>
+</div>
+
+<div id="app">
+  <div class="header">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <h1>DJ <span>TOOL</span></h1>
+    </div>
+    <div class="header-info">
+      <div class="info-item">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="modeLabel">IDLE</span>
+      </div>
+      <div class="info-item" id="rateInfo" style="display:none">
+        <span id="rateLabel">— Hz</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="analyzer">◉ Analyzer</button>
+    <button class="tab" data-tab="bpm">♪ BPM</button>
+    <button class="tab" data-tab="harmonic">♯ Harmonic</button>
+  </div>
+
+  <!-- ANALYZER TAB -->
+  <div class="tab-content active" id="tab-analyzer">
+    <div class="top-row">
+      <div class="metric-card">
+        <div class="metric-label">LUFS-S</div>
+        <div class="metric-value" id="lufsValue">—</div>
+        <div class="metric-target" id="lufsTarget">tgt —</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Peak</div>
+        <div class="metric-value" id="peakValue">—</div>
+        <div class="metric-target" id="peakTarget">tgt —</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">RMS</div>
+        <div class="metric-value" id="rmsValue">—</div>
+        <div class="metric-target" id="rmsTarget">tgt —</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Crest</div>
+        <div class="metric-value" id="crestValue">—</div>
+        <div class="metric-target" id="crestTarget">tgt —</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">L / R</div>
+        <div class="stereo-meter">
+          <div class="stereo-row">
+            <span class="stereo-label">L</span>
+            <div class="stereo-bar"><div class="stereo-fill" id="leftBar"></div></div>
+          </div>
+          <div class="stereo-row">
+            <span class="stereo-label">R</span>
+            <div class="stereo-bar"><div class="stereo-fill" id="rightBar"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="spectrum-container">
+      <canvas id="spectrum"></canvas>
+    </div>
+
+    <div class="bands-row" id="bandsRow"></div>
+
+    <div class="controls">
+      <button class="btn primary" id="lockBtn">⌖ Lock Target</button>
+      <button class="btn danger" id="clearBtn">✕ Clear</button>
+      <button class="btn" id="modeBtn">3-Band</button>
+      <button class="btn active" id="autoLockBtn">Auto: ON</button>
+      <div class="control-group">
+        <span class="control-label">Win</span>
+        <input type="range" id="windowSlider" min="1" max="15" value="5" step="1">
+        <span class="slider-value" id="windowValue">5min</span>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Smooth</span>
+        <input type="range" id="smoothSlider" min="0" max="95" value="70" step="5">
+        <span class="slider-value" id="smoothValue">0.70</span>
+      </div>
+      <div class="control-group">
+        <span class="control-label">Gain</span>
+        <input type="range" id="gainSlider" min="0" max="40" value="0" step="1">
+        <span class="slider-value" id="gainValue">0dB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BPM TAB -->
+  <div class="tab-content" id="tab-bpm">
+    <div class="bpm-layout">
+      <!-- AUTO BPM -->
+      <div class="bpm-panel">
+        <div class="panel-title">Auto Detection</div>
+        <div class="bpm-display">
+          <div>
+            <div class="bpm-big" id="autoBpmValue">—</div>
+          </div>
+          <div class="bpm-unit">BPM · DETECTED</div>
+          <div class="bpm-confidence">
+            <span>Confidence</span>
+            <div class="bpm-confidence-bar"><div class="bpm-confidence-fill" id="bpmConfFill"></div></div>
+            <span id="bpmConfText">—</span>
+          </div>
+          <div class="bpm-alternatives" id="bpmAlternatives"></div>
+        </div>
+        <div class="bpm-controls">
+          <button class="btn primary" id="autoBpmStart">▶ Start Detect</button>
+          <button class="btn" id="autoBpmHalf">÷2</button>
+          <button class="btn" id="autoBpmDouble">×2</button>
+        </div>
+        <div class="bpm-utils">
+          <div class="util-row">
+            <span class="util-label">1 bar (4/4)</span>
+            <span class="util-value" id="barMs">—</span>
+          </div>
+          <div class="util-row">
+            <span class="util-label">8 bars</span>
+            <span class="util-value" id="eightBarsMs">—</span>
+          </div>
+          <div class="util-row">
+            <span class="util-label">1/4 note</span>
+            <span class="util-value" id="quarterMs">—</span>
+          </div>
+          <div class="util-row">
+            <span class="util-label">1/8 note</span>
+            <span class="util-value" id="eighthMs">—</span>
+          </div>
+          <div class="util-row">
+            <span class="util-label">Delay 1/4</span>
+            <span class="util-value" id="delay4">—</span>
+          </div>
+          <div class="util-row">
+            <span class="util-label">Delay 1/8</span>
+            <span class="util-value" id="delay8">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAP TEMPO -->
+      <div class="bpm-panel">
+        <div class="panel-title">Tap Tempo</div>
+        <div class="tap-area">
+          <div class="bpm-big" id="tapBpmValue">—</div>
+          <div class="bpm-unit">BPM · TAP</div>
+          <div class="tap-pad" id="tapPad">
+            <div class="tap-label">TAP</div>
+          </div>
+          <div class="tap-info">
+            Taps: <span id="tapCount">0</span>
+            Avg: <span id="tapAvg">—</span> ms
+          </div>
+        </div>
+        <div class="bpm-controls">
+          <button class="btn" id="tapReset">Reset</button>
+          <button class="btn" id="tapUseAsBpm">Use as BPM</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HARMONIC TAB -->
+  <div class="tab-content" id="tab-harmonic">
+    <div class="harmonic-layout">
+      <div class="harmonic-controls-panel">
+        <div class="panel-title">Select Key</div>
+        
+        <div class="notation-toggle">
+          <button class="notation-btn active" data-notation="camelot">Camelot</button>
+          <button class="notation-btn" data-notation="musical">Cifrado</button>
+          <button class="notation-btn" data-notation="open">Open Key</button>
+        </div>
+        
+        <div class="key-grid" id="keyGrid"></div>
+        
+        <div style="margin-top: 8px; font-size: 9px; color: var(--text-mute); line-height: 1.5;">
+          <div style="color: var(--orange); margin-bottom: 2px;">● Major (B en Camelot)</div>
+          <div style="color: var(--blue);">● Minor (A en Camelot)</div>
+        </div>
+      </div>
+
+      <div class="harmonic-display-panel">
+        <div class="panel-title">Compatible Keys</div>
+        <div class="compatibility-display" id="compatDisplay">
+          <div style="text-align:center; color: var(--text-mute); padding: 40px; font-size: 11px;">
+            Seleccioná una tonalidad para ver las compatibles
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ============ CONFIGURATION ============
+const CONFIG = {
+  fftSize: 8192,
+  smoothing: 0.7,
+  minDb: -90,
+  maxDb: -10,
+  bands3: [
+    { name: 'LOW',  fmin: 20,   fmax: 300,   color: '#ff3060', freq: '20-300Hz' },
+    { name: 'MID',  fmin: 300,  fmax: 4000,  color: '#C6FF00', freq: '0.3-4kHz' },
+    { name: 'HIGH', fmin: 4000, fmax: 22000, color: '#30aaff', freq: '4-22kHz' }
+  ],
+  bands4: [
+    { name: 'LOW',     fmin: 20,    fmax: 220,   color: '#ff3060', freq: '20-220Hz' },
+    { name: 'LO-MID',  fmin: 220,   fmax: 1400,  color: '#ff9030', freq: '0.22-1.4k' },
+    { name: 'HI-MID',  fmin: 1400,  fmax: 7000,  color: '#C6FF00', freq: '1.4-7k' },
+    { name: 'HIGH',    fmin: 7000,  fmax: 22000, color: '#30aaff', freq: '7-22k' }
+  ],
+  trackChangeThreshold: -45,
+  trackChangeDuration: 1500,
+};
+
+// ============ STATE ============
+const state = {
+  audioCtx: null,
+  analyser: null,
+  splitter: null,
+  analyserL: null,
+  analyserR: null,
+  gainNode: null,
+  bpmFilterNode: null,
+  bpmAnalyser: null,
+  stream: null,
+  freqData: null,
+  timeData: null,
+  timeDataL: null,
+  timeDataR: null,
+  bpmTimeData: null,
+  running: false,
+  bandMode: 3,
+  bands: CONFIG.bands3,
+  historyFrames: [],
+  windowMinutes: 5,
+  target: null,
+  autoLock: true,
+  lowLevelStart: null,
+  lastLockTime: 0,
+  smoothedSpectrum: null,
+  peakHoldValue: -Infinity,
+  peakHoldTime: 0,
+  gainDb: 0,
+  
+  // BPM detection
+  bpmDetecting: false,
+  bpmEnergyHistory: [],
+  bpmPeaks: [],
+  bpmCurrentValue: null,
+  bpmConfidence: 0,
+  bpmAlternatives: [],
+  
+  // Tap tempo
+  tapTimes: [],
+  tapTimeoutId: null,
+  
+  // Harmonic
+  selectedKey: null,
+  notation: 'camelot',
+};
+
+// ============ DOM HELPER ============
+const $ = (id) => document.getElementById(id);
+
+// ============ TAB SWITCHING ============
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    const tabId = tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    tab.classList.add('active');
+    $('tab-' + tabId).classList.add('active');
+  });
+});
+
+// ============ AUDIO INIT ============
+async function startAudio() {
+  try {
+    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+      sampleRate: 48000,
+      latencyHint: 'interactive'
+    });
+    
+    state.stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+        channelCount: 2,
+      }
+    });
+    
+    const source = state.audioCtx.createMediaStreamSource(state.stream);
+    
+    state.gainNode = state.audioCtx.createGain();
+    state.gainNode.gain.value = 1.0;
+    
+    state.analyser = state.audioCtx.createAnalyser();
+    state.analyser.fftSize = CONFIG.fftSize;
+    state.analyser.smoothingTimeConstant = CONFIG.smoothing;
+    state.analyser.minDecibels = CONFIG.minDb;
+    state.analyser.maxDecibels = CONFIG.maxDb;
+    
+    state.splitter = state.audioCtx.createChannelSplitter(2);
+    state.analyserL = state.audioCtx.createAnalyser();
+    state.analyserR = state.audioCtx.createAnalyser();
+    state.analyserL.fftSize = 2048;
+    state.analyserR.fftSize = 2048;
+    
+    // BPM detection chain: lowpass filter (focus on kick/bass) + analyser
+    state.bpmFilterNode = state.audioCtx.createBiquadFilter();
+    state.bpmFilterNode.type = 'lowpass';
+    state.bpmFilterNode.frequency.value = 150;
+    state.bpmFilterNode.Q.value = 1;
+    
+    state.bpmAnalyser = state.audioCtx.createAnalyser();
+    state.bpmAnalyser.fftSize = 1024;
+    state.bpmAnalyser.smoothingTimeConstant = 0;
+    
+    source.connect(state.gainNode);
+    state.gainNode.connect(state.analyser);
+    state.gainNode.connect(state.splitter);
+    state.splitter.connect(state.analyserL, 0);
+    state.splitter.connect(state.analyserR, 1);
+    state.gainNode.connect(state.bpmFilterNode);
+    state.bpmFilterNode.connect(state.bpmAnalyser);
+    
+    state.freqData = new Float32Array(state.analyser.frequencyBinCount);
+    state.timeData = new Float32Array(state.analyser.fftSize);
+    state.timeDataL = new Float32Array(state.analyserL.fftSize);
+    state.timeDataR = new Float32Array(state.analyserR.fftSize);
+    state.bpmTimeData = new Float32Array(state.bpmAnalyser.fftSize);
+    state.smoothedSpectrum = new Float32Array(state.analyser.frequencyBinCount);
+    state.smoothedSpectrum.fill(-Infinity);
+    
+    state.running = true;
+    $('statusDot').classList.add('active');
+    $('modeLabel').textContent = 'LIVE';
+    $('rateInfo').style.display = 'flex';
+    $('rateLabel').textContent = state.audioCtx.sampleRate + ' Hz';
+    
+    await loadPersistedState();
+    requestAnimationFrame(loop);
+    requestWakeLock();
+    return true;
+  } catch (err) {
+    alert('Error de audio: ' + err.message + '\n\nVerificá permisos.');
+    return false;
+  }
+}
+
+function startNoAudio() {
+  state.running = true;
+  $('modeLabel').textContent = 'NO AUDIO';
+  loadPersistedState();
+  // Switch to BPM tab by default
+  document.querySelector('[data-tab="bpm"]').click();
+}
+
+// ============ SPECTRUM ANALYSIS ============
+function getFreqIndex(freq) {
+  if (!state.audioCtx) return 0;
+  const nyquist = state.audioCtx.sampleRate / 2;
+  return Math.round(freq / nyquist * state.analyser.frequencyBinCount);
+}
+
+function getBandLevel(spectrum, fmin, fmax) {
+  const i1 = getFreqIndex(fmin);
+  const i2 = Math.min(getFreqIndex(fmax), spectrum.length - 1);
+  let sum = 0, count = 0;
+  for (let i = i1; i <= i2; i++) {
+    if (isFinite(spectrum[i])) {
+      sum += Math.pow(10, spectrum[i] / 10);
+      count++;
+    }
+  }
+  return count === 0 ? -Infinity : 10 * Math.log10(sum / count);
+}
+
+function getAllBandLevels(spectrum) {
+  return state.bands.map(b => getBandLevel(spectrum, b.fmin, b.fmax));
+}
+
+function computeKWeightedLoudness(timeData) {
+  let sumSq = 0;
+  for (let i = 0; i < timeData.length; i++) sumSq += timeData[i] * timeData[i];
+  const meanSq = sumSq / timeData.length;
+  return meanSq <= 0 ? -Infinity : 10 * Math.log10(meanSq) - 0.691;
+}
+
+function computeRMS(timeData) {
+  let sumSq = 0;
+  for (let i = 0; i < timeData.length; i++) sumSq += timeData[i] * timeData[i];
+  const rms = Math.sqrt(sumSq / timeData.length);
+  return rms > 0 ? 20 * Math.log10(rms) : -Infinity;
+}
+
+function computePeak(timeData) {
+  let peak = 0;
+  for (let i = 0; i < timeData.length; i++) {
+    const abs = Math.abs(timeData[i]);
+    if (abs > peak) peak = abs;
+  }
+  return peak > 0 ? 20 * Math.log10(peak) : -Infinity;
+}
+
+// ============ BPM DETECTION ============
+// Energy-based onset detection + autocorrelation on inter-onset intervals
+function processBpmFrame(now) {
+  if (!state.bpmDetecting || !state.bpmAnalyser) return;
+  
+  state.bpmAnalyser.getFloatTimeDomainData(state.bpmTimeData);
+  
+  // Compute RMS energy of this frame (lowpass-filtered signal)
+  let sumSq = 0;
+  for (let i = 0; i < state.bpmTimeData.length; i++) {
+    sumSq += state.bpmTimeData[i] * state.bpmTimeData[i];
+  }
+  const energy = Math.sqrt(sumSq / state.bpmTimeData.length);
+  
+  state.bpmEnergyHistory.push({ time: now, energy });
+  
+  // Keep only last 8 seconds of energy history
+  const cutoff = now - 8000;
+  while (state.bpmEnergyHistory.length > 0 && state.bpmEnergyHistory[0].time < cutoff) {
+    state.bpmEnergyHistory.shift();
+  }
+  
+  // Detect peaks (kick hits) using adaptive threshold
+  if (state.bpmEnergyHistory.length > 20) {
+    detectBpmPeaks(now);
+  }
+}
+
+function detectBpmPeaks(now) {
+  const hist = state.bpmEnergyHistory;
+  if (hist.length < 30) return;
+  
+  // Compute local average of recent energy
+  const recent = hist.slice(-30);
+  let avg = 0;
+  for (const e of recent) avg += e.energy;
+  avg /= recent.length;
+  
+  // Current energy
+  const current = hist[hist.length - 1];
+  const prev1 = hist[hist.length - 2];
+  const prev2 = hist[hist.length - 3];
+  
+  // Peak: current energy is significantly above average and was rising
+  const threshold = avg * 1.5;
+  const isPeak = current.energy > threshold && 
+                 current.energy > prev1.energy && 
+                 prev1.energy > prev2.energy;
+  
+  if (isPeak) {
+    // Don't add peaks too close together (would imply BPM > 300)
+    const lastPeak = state.bpmPeaks[state.bpmPeaks.length - 1];
+    if (!lastPeak || (current.time - lastPeak.time) > 200) {
+      state.bpmPeaks.push({ time: current.time, energy: current.energy });
+      
+      // Keep last 60 peaks (~30 seconds at 120 BPM)
+      if (state.bpmPeaks.length > 60) {
+        state.bpmPeaks.shift();
+      }
+      
+      computeBpmFromPeaks();
+    }
+  }
+}
+
+function computeBpmFromPeaks() {
+  if (state.bpmPeaks.length < 8) return;
+  
+  // Compute inter-onset intervals (IOIs)
+  const iois = [];
+  for (let i = 1; i < state.bpmPeaks.length; i++) {
+    iois.push(state.bpmPeaks[i].time - state.bpmPeaks[i-1].time);
+  }
+  
+  // Histogram of BPMs (60..200 range)
+  const bpmCounts = new Map();
+  
+  for (const ioi of iois) {
+    if (ioi < 200 || ioi > 1500) continue;
+    
+    // Test this IOI as direct beat, half-beat, double-beat
+    const candidates = [
+      60000 / ioi,           // direct
+      60000 / (ioi * 2),     // half (1 beat = 2 IOIs)
+      60000 / (ioi / 2),     // double (2 beats = 1 IOI)
+    ];
+    
+    for (let bpm of candidates) {
+      // Normalize to 60-200 range by doubling/halving
+      while (bpm < 60) bpm *= 2;
+      while (bpm > 200) bpm /= 2;
+      if (bpm < 60 || bpm > 200) continue;
+      
+      const rounded = Math.round(bpm * 2) / 2; // 0.5 BPM bins
+      bpmCounts.set(rounded, (bpmCounts.get(rounded) || 0) + 1);
+    }
+  }
+  
+  if (bpmCounts.size === 0) return;
+  
+  // Find top BPMs
+  const sorted = Array.from(bpmCounts.entries()).sort((a, b) => b[1] - a[1]);
+  const topBpm = sorted[0][0];
+  const topCount = sorted[0][1];
+  const totalCounts = Array.from(bpmCounts.values()).reduce((a, b) => a + b, 0);
+  const confidence = Math.min(100, (topCount / totalCounts) * 250);
+  
+  state.bpmCurrentValue = topBpm;
+  state.bpmConfidence = confidence;
+  state.bpmAlternatives = sorted.slice(1, 4).map(([bpm]) => bpm);
+}
+
+function updateBpmDisplay() {
+  if (state.bpmCurrentValue) {
+    $('autoBpmValue').textContent = state.bpmCurrentValue.toFixed(1);
+    $('bpmConfFill').style.width = state.bpmConfidence + '%';
+    $('bpmConfText').textContent = Math.round(state.bpmConfidence) + '%';
+    
+    const altsEl = $('bpmAlternatives');
+    altsEl.innerHTML = state.bpmAlternatives.length > 0 
+      ? '<div class="bpm-alt">Alt: ' + state.bpmAlternatives.map(b => `<span>${b.toFixed(1)}</span>`).join(' · ') + '</div>'
+      : '';
+    
+    updateBpmUtils(state.bpmCurrentValue);
+  }
+}
+
+function updateBpmUtils(bpm) {
+  if (!bpm || bpm <= 0) return;
+  const quarter = 60000 / bpm; // ms per quarter note
+  const eighth = quarter / 2;
+  const sixteenth = quarter / 4;
+  const bar = quarter * 4;
+  $('barMs').textContent = bar.toFixed(0) + ' ms';
+  $('eightBarsMs').textContent = (bar * 8 / 1000).toFixed(2) + ' s';
+  $('quarterMs').textContent = quarter.toFixed(1) + ' ms';
+  $('eighthMs').textContent = eighth.toFixed(1) + ' ms';
+  $('delay4').textContent = quarter.toFixed(0) + ' ms';
+  $('delay8').textContent = eighth.toFixed(0) + ' ms';
+}
+
+// ============ TAP TEMPO ============
+function handleTap() {
+  const now = performance.now();
+  
+  // Reset if more than 2 seconds since last tap
+  if (state.tapTimes.length > 0) {
+    const lastTap = state.tapTimes[state.tapTimes.length - 1];
+    if (now - lastTap > 2000) {
+      state.tapTimes = [];
+    }
+  }
+  
+  state.tapTimes.push(now);
+  
+  // Keep last 16 taps
+  if (state.tapTimes.length > 16) {
+    state.tapTimes.shift();
+  }
+  
+  // Visual feedback
+  const pad = $('tapPad');
+  pad.classList.add('tapped');
+  setTimeout(() => pad.classList.remove('tapped'), 80);
+  
+  // Compute BPM from intervals
+  if (state.tapTimes.length >= 2) {
+    const intervals = [];
+    for (let i = 1; i < state.tapTimes.length; i++) {
+      intervals.push(state.tapTimes[i] - state.tapTimes[i-1]);
+    }
+    const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const bpm = 60000 / avg;
+    
+    $('tapBpmValue').textContent = bpm.toFixed(1);
+    $('tapAvg').textContent = avg.toFixed(0);
+  }
+  
+  $('tapCount').textContent = state.tapTimes.length;
+  
+  // Auto-reset timer
+  clearTimeout(state.tapTimeoutId);
+  state.tapTimeoutId = setTimeout(() => {
+    // Don't clear automatically — let user reset manually
+  }, 5000);
+}
+
+function resetTap() {
+  state.tapTimes = [];
+  $('tapBpmValue').textContent = '—';
+  $('tapAvg').textContent = '—';
+  $('tapCount').textContent = '0';
+}
+
+// ============ HARMONIC MIXING ============
+// Camelot wheel: 1A-12A (minor), 1B-12B (major)
+// Mapping musical key -> Camelot code
+const KEYS = [
+  // [musical, camelot, openKey, type]
+  { musical: 'C',   camelot: '8B',  open: '1d', type: 'major' },
+  { musical: 'G',   camelot: '9B',  open: '2d', type: 'major' },
+  { musical: 'D',   camelot: '10B', open: '3d', type: 'major' },
+  { musical: 'A',   camelot: '11B', open: '4d', type: 'major' },
+  { musical: 'E',   camelot: '12B', open: '5d', type: 'major' },
+  { musical: 'B',   camelot: '1B',  open: '6d', type: 'major' },
+  { musical: 'F#',  camelot: '2B',  open: '7d', type: 'major' },
+  { musical: 'Db',  camelot: '3B',  open: '8d', type: 'major' },
+  { musical: 'Ab',  camelot: '4B',  open: '9d', type: 'major' },
+  { musical: 'Eb',  camelot: '5B',  open: '10d',type: 'major' },
+  { musical: 'Bb',  camelot: '6B',  open: '11d',type: 'major' },
+  { musical: 'F',   camelot: '7B',  open: '12d',type: 'major' },
+  // Minors
+  { musical: 'Am',  camelot: '8A',  open: '1m', type: 'minor' },
+  { musical: 'Em',  camelot: '9A',  open: '2m', type: 'minor' },
+  { musical: 'Bm',  camelot: '10A', open: '3m', type: 'minor' },
+  { musical: 'F#m', camelot: '11A', open: '4m', type: 'minor' },
+  { musical: 'C#m', camelot: '12A', open: '5m', type: 'minor' },
+  { musical: 'G#m', camelot: '1A',  open: '6m', type: 'minor' },
+  { musical: 'Ebm', camelot: '2A',  open: '7m', type: 'minor' },
+  { musical: 'Bbm', camelot: '3A',  open: '8m', type: 'minor' },
+  { musical: 'Fm',  camelot: '4A',  open: '9m', type: 'minor' },
+  { musical: 'Cm',  camelot: '5A',  open: '10m',type: 'minor' },
+  { musical: 'Gm',  camelot: '6A',  open: '11m',type: 'minor' },
+  { musical: 'Dm',  camelot: '7A',  open: '12m',type: 'minor' },
+];
+
+function getKeyByCamelot(camelot) {
+  return KEYS.find(k => k.camelot === camelot);
+}
+
+function getCamelotNumber(camelot) {
+  return parseInt(camelot);
+}
+
+function getCamelotLetter(camelot) {
+  return camelot.slice(-1);
+}
+
+function findCompatible(key) {
+  if (!key) return null;
+  const num = getCamelotNumber(key.camelot);
+  const letter = getCamelotLetter(key.camelot);
+  
+  // Wrap function for wheel positions (1-12)
+  const wrap = (n) => ((n - 1 + 12) % 12) + 1;
+  const otherLetter = letter === 'A' ? 'B' : 'A';
+  
+  return {
+    perfect: [
+      { ...getKeyByCamelot(key.camelot), reason: 'Same key' }
+    ],
+    energy: [
+      { ...getKeyByCamelot(wrap(num + 1) + letter), reason: '+1 energy boost' },
+      { ...getKeyByCamelot(wrap(num - 1) + letter), reason: '-1 energy drop' },
+    ],
+    mood: [
+      // Relative major/minor (same number, different letter)
+      { ...getKeyByCamelot(num + otherLetter), reason: 'Mood change (rel.)' },
+    ],
+    bold: [
+      // Up/down 2, energy jumps
+      { ...getKeyByCamelot(wrap(num + 2) + letter), reason: '+2 big boost' },
+      // Major <-> Minor jumps
+      { ...getKeyByCamelot(wrap(num + 7) + otherLetter), reason: 'Dom/sub jump' },
+    ],
+    risky: [
+      { ...getKeyByCamelot(wrap(num + 3) + letter), reason: '+3 (use with care)' },
+      { ...getKeyByCamelot(wrap(num - 3) + letter), reason: '-3 (use with care)' },
+    ]
+  };
+}
+
+function buildKeyGrid() {
+  const grid = $('keyGrid');
+  grid.innerHTML = '';
+  
+  // Build 12 rows × 2 columns (major | minor), grouped by Camelot number
+  // Order: 1A 1B  2A 2B  ...  12A 12B
+  for (let n = 1; n <= 12; n++) {
+    for (const letter of ['A', 'B']) {
+      const camelot = n + letter;
+      const key = getKeyByCamelot(camelot);
+      if (!key) continue;
+      
+      const cell = document.createElement('button');
+      cell.className = 'key-cell ' + (key.type === 'minor' ? 'minor' : 'major');
+      cell.dataset.camelot = camelot;
+      cell.textContent = getKeyLabel(key);
+      
+      cell.addEventListener('click', () => {
+        state.selectedKey = key;
+        document.querySelectorAll('.key-cell').forEach(c => c.classList.remove('selected'));
+        cell.classList.add('selected');
+        renderCompatibility();
+        persistState();
+      });
+      
+      grid.appendChild(cell);
+    }
+  }
+  
+  // Re-select if already chosen
+  if (state.selectedKey) {
+    const cell = grid.querySelector(`[data-camelot="${state.selectedKey.camelot}"]`);
+    if (cell) cell.classList.add('selected');
+  }
+}
+
+function getKeyLabel(key) {
+  switch (state.notation) {
+    case 'camelot': return key.camelot;
+    case 'musical': return key.musical;
+    case 'open':    return key.open;
+  }
+}
+
+function renderCompatibility() {
+  const display = $('compatDisplay');
+  
+  if (!state.selectedKey) {
+    display.innerHTML = '<div style="text-align:center; color: var(--text-mute); padding: 40px; font-size: 11px;">Seleccioná una tonalidad</div>';
+    return;
+  }
+  
+  const compat = findCompatible(state.selectedKey);
+  if (!compat) return;
+  
+  let html = `
+    <div class="current-key-display">
+      <div class="current-key-camelot">${state.selectedKey.camelot}</div>
+      <div class="current-key-musical">${state.selectedKey.musical} · ${state.selectedKey.open}</div>
+      <div class="current-key-label">${state.selectedKey.type === 'major' ? 'Major' : 'Minor'} · Selected Key</div>
+    </div>
+  `;
+  
+  html += buildCompatSection('Perfect Match', 'perfect', compat.perfect, '');
+  html += buildCompatSection('Energy Shift', 'warm', compat.energy, 'warm');
+  html += buildCompatSection('Mood Change', 'mood', compat.mood, '');
+  html += buildCompatSection('Bold Transitions', 'bold', compat.bold, 'bold');
+  html += buildCompatSection('Risky / Advanced', 'risky', compat.risky, 'risk');
+  
+  display.innerHTML = html;
+  
+  // Add click handlers to compat items
+  display.querySelectorAll('.compat-item[data-camelot]').forEach(item => {
+    item.addEventListener('click', () => {
+      const camelot = item.dataset.camelot;
+      const key = getKeyByCamelot(camelot);
+      if (key) {
+        state.selectedKey = key;
+        document.querySelectorAll('.key-cell').forEach(c => c.classList.remove('selected'));
+        const cell = document.querySelector(`.key-cell[data-camelot="${camelot}"]`);
+        if (cell) cell.classList.add('selected');
+        renderCompatibility();
+        persistState();
+      }
+    });
+  });
+}
+
+function buildCompatSection(title, key, items, modifier) {
+  const validItems = items.filter(i => i && i.camelot);
+  if (validItems.length === 0) return '';
+  
+  return `
+    <div class="compat-section">
+      <div class="compat-section-title ${modifier}">${title}</div>
+      <div class="compat-list">
+        ${validItems.map(item => `
+          <div class="compat-item" data-camelot="${item.camelot}">
+            <div class="compat-item-camelot">${item.camelot}</div>
+            <div class="compat-item-musical">${item.musical} · ${item.open}</div>
+            <div class="compat-item-desc">${item.reason}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// Notation toggle
+document.querySelectorAll('.notation-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.notation-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.notation = btn.dataset.notation;
+    // Update key labels in grid
+    document.querySelectorAll('.key-cell').forEach(cell => {
+      const key = getKeyByCamelot(cell.dataset.camelot);
+      if (key) cell.textContent = getKeyLabel(key);
+    });
+    persistState();
+  });
+});
+
+// ============ MAIN LOOP ============
+let lastFrameTime = 0;
+let frameCounter = 0;
+
+function loop(now) {
+  if (!state.running) return;
+  
+  if (state.audioCtx) {
+    state.analyser.getFloatFrequencyData(state.freqData);
+    state.analyser.getFloatTimeDomainData(state.timeData);
+    state.analyserL.getFloatTimeDomainData(state.timeDataL);
+    state.analyserR.getFloatTimeDomainData(state.timeDataR);
+    
+    const rms = computeRMS(state.timeData);
+    const peak = computePeak(state.timeData);
+    const lufs = computeKWeightedLoudness(state.timeData);
+    const crest = (isFinite(peak) && isFinite(rms)) ? peak - rms : 0;
+    const rmsL = computeRMS(state.timeDataL);
+    const rmsR = computeRMS(state.timeDataR);
+    
+    const smoothFactor = parseFloat($('smoothSlider').value) / 100;
+    for (let i = 0; i < state.freqData.length; i++) {
+      if (!isFinite(state.smoothedSpectrum[i])) {
+        state.smoothedSpectrum[i] = state.freqData[i];
+      } else {
+        state.smoothedSpectrum[i] = state.smoothedSpectrum[i] * smoothFactor + 
+                                     state.freqData[i] * (1 - smoothFactor);
+      }
+    }
+    
+    if (now - lastFrameTime > 100) {
+      lastFrameTime = now;
+      frameCounter++;
+      
+      if (rms > -60) {
+        state.historyFrames.push({
+          time: now,
+          spectrum: new Float32Array(state.freqData),
+          lufs, peak, rms, crest
+        });
+        const windowMs = state.windowMinutes * 60 * 1000;
+        const cutoff = now - windowMs;
+        state.historyFrames = state.historyFrames.filter(f => f.time >= cutoff);
+      }
+    }
+    
+    if (state.autoLock) detectTrackChange(now, rms);
+    
+    // BPM processing
+    processBpmFrame(now);
+    
+    updateMetrics(lufs, peak, rms, crest, rmsL, rmsR);
+    updateBands();
+    drawSpectrum();
+    
+    if (state.bpmDetecting) updateBpmDisplay();
+    
+    if (frameCounter % 30 === 0) persistState();
+  }
+  
+  requestAnimationFrame(loop);
+}
+
+function detectTrackChange(now, rms) {
+  if (rms < CONFIG.trackChangeThreshold) {
+    if (!state.lowLevelStart) state.lowLevelStart = now;
+    else if (now - state.lowLevelStart > CONFIG.trackChangeDuration) {
+      if (state.historyFrames.length > 30 && now - state.lastLockTime > 30000) {
+        lockTarget(true);
+        state.lastLockTime = now;
+        // Reset BPM peaks on track change
+        state.bpmPeaks = [];
+      }
+      state.lowLevelStart = null;
+    }
+  } else {
+    state.lowLevelStart = null;
+  }
+}
+
+// ============ TARGET ============
+function lockTarget(isAuto = false) {
+  if (state.historyFrames.length < 10) {
+    if (!isAuto) alert('Necesitás ~1s de audio para lockear target.');
+    return;
+  }
+  
+  const numFrames = state.historyFrames.length;
+  const specLen = state.historyFrames[0].spectrum.length;
+  const avgSpec = new Float32Array(specLen);
+  
+  let sumLufs = 0, sumPeak = 0, sumRms = 0, sumCrest = 0;
+  let cLufs = 0, cPeak = 0, cRms = 0, cCrest = 0;
+  
+  for (let i = 0; i < specLen; i++) {
+    let sumLin = 0, count = 0;
+    for (let f = 0; f < numFrames; f++) {
+      const v = state.historyFrames[f].spectrum[i];
+      if (isFinite(v)) {
+        sumLin += Math.pow(10, v / 10);
+        count++;
+      }
+    }
+    avgSpec[i] = count > 0 ? 10 * Math.log10(sumLin / count) : -Infinity;
+  }
+  
+  for (const f of state.historyFrames) {
+    if (isFinite(f.lufs)) { sumLufs += f.lufs; cLufs++; }
+    if (isFinite(f.peak)) { sumPeak += f.peak; cPeak++; }
+    if (isFinite(f.rms)) { sumRms += f.rms; cRms++; }
+    if (isFinite(f.crest)) { sumCrest += f.crest; cCrest++; }
+  }
+  
+  state.target = {
+    spectrum: avgSpec,
+    bandLevels: getAllBandLevels(avgSpec),
+    lufs: cLufs ? sumLufs / cLufs : -Infinity,
+    peak: cPeak ? sumPeak / cPeak : -Infinity,
+    rms: cRms ? sumRms / cRms : -Infinity,
+    crest: cCrest ? sumCrest / cCrest : 0,
+    timestamp: Date.now(),
+    isAuto
+  };
+  
+  persistState();
+  
+  const btn = $('lockBtn');
+  const orig = btn.textContent;
+  btn.textContent = isAuto ? '⌖ AUTO ✓' : '⌖ LOCKED ✓';
+  setTimeout(() => { btn.textContent = orig; }, 1200);
+}
+
+function clearTarget() {
+  state.target = null;
+  state.historyFrames = [];
+  persistState();
+}
+
+// ============ UI UPDATE ============
+function updateMetrics(lufs, peak, rms, crest, rmsL, rmsR) {
+  const fmt = (v, d = 1) => isFinite(v) ? v.toFixed(d) : '—';
+  
+  $('lufsValue').textContent = fmt(lufs);
+  $('peakValue').textContent = fmt(peak);
+  $('rmsValue').textContent = fmt(rms);
+  $('crestValue').textContent = fmt(crest);
+  
+  $('peakValue').className = 'metric-value' + (peak > -1 ? ' over' : peak > -6 ? ' warn' : '');
+  $('lufsValue').className = 'metric-value' + (lufs > -6 ? ' over' : lufs > -10 ? ' warn' : '');
+  
+  if (state.target) {
+    $('lufsTarget').textContent = 'tgt ' + fmt(state.target.lufs);
+    $('peakTarget').textContent = 'tgt ' + fmt(state.target.peak);
+    $('rmsTarget').textContent = 'tgt ' + fmt(state.target.rms);
+    $('crestTarget').textContent = 'tgt ' + fmt(state.target.crest);
+  } else {
+    $('lufsTarget').textContent = 'tgt —';
+    $('peakTarget').textContent = 'tgt —';
+    $('rmsTarget').textContent = 'tgt —';
+    $('crestTarget').textContent = 'tgt —';
+  }
+  
+  const lPct = isFinite(rmsL) ? Math.max(0, Math.min(100, (rmsL + 60) / 60 * 100)) : 0;
+  const rPct = isFinite(rmsR) ? Math.max(0, Math.min(100, (rmsR + 60) / 60 * 100)) : 0;
+  $('leftBar').style.width = lPct + '%';
+  $('rightBar').style.width = rPct + '%';
+}
+
+function updateBands() {
+  const bandLevels = getAllBandLevels(state.smoothedSpectrum);
+  
+  state.bands.forEach((band, i) => {
+    const current = bandLevels[i];
+    const target = state.target ? state.target.bandLevels[i] : null;
+    const dbMin = -60, dbMax = 0;
+    const pct = isFinite(current) ? Math.max(0, Math.min(100, (current - dbMin) / (dbMax - dbMin) * 100)) : 0;
+    
+    const fillEl = $(`band-fill-${i}`);
+    const valueEl = $(`band-value-${i}`);
+    const deltaEl = $(`band-delta-${i}`);
+    const targetLine = $(`band-target-${i}`);
+    
+    if (fillEl) {
+      fillEl.style.width = pct + '%';
+      fillEl.style.background = band.color;
+    }
+    if (valueEl) valueEl.textContent = isFinite(current) ? current.toFixed(1) + ' dB' : '— dB';
+    
+    if (deltaEl && target !== null && isFinite(target) && isFinite(current)) {
+      const delta = current - target;
+      deltaEl.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1);
+      const abs = Math.abs(delta);
+      deltaEl.className = 'band-delta' + (abs < 1 ? ' match' : delta > 0 ? ' over' : ' under');
+    } else if (deltaEl) {
+      deltaEl.textContent = '—';
+      deltaEl.className = 'band-delta';
+    }
+    
+    if (targetLine && target !== null && isFinite(target)) {
+      const tgtPct = Math.max(0, Math.min(100, (target - dbMin) / (dbMax - dbMin) * 100));
+      targetLine.style.left = tgtPct + '%';
+      targetLine.classList.add('active');
+    } else if (targetLine) {
+      targetLine.classList.remove('active');
+    }
+  });
+}
+
+function drawSpectrum() {
+  const canvas = $('spectrum');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const h = canvas.height = canvas.clientHeight * devicePixelRatio;
+  
+  ctx.clearRect(0, 0, w, h);
+  
+  const fMin = 20, fMax = 22000;
+  const logMin = Math.log10(fMin);
+  const logMax = Math.log10(fMax);
+  
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 1 * devicePixelRatio;
+  ctx.fillStyle = '#444';
+  ctx.font = `${10 * devicePixelRatio}px "JetBrains Mono", monospace`;
+  
+  const freqMarks = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+  freqMarks.forEach(f => {
+    const x = (Math.log10(f) - logMin) / (logMax - logMin) * w;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+    const label = f >= 1000 ? (f/1000) + 'k' : f + '';
+    ctx.fillText(label, x + 3 * devicePixelRatio, h - 4 * devicePixelRatio);
+  });
+  
+  const dbMin = CONFIG.minDb, dbMax = CONFIG.maxDb;
+  for (let db = dbMax; db >= dbMin; db -= 10) {
+    const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+    ctx.fillText(db + ' dB', 4 * devicePixelRatio, y - 2 * devicePixelRatio);
+  }
+  
+  state.bands.forEach(band => {
+    const x1 = (Math.log10(Math.max(band.fmin, fMin)) - logMin) / (logMax - logMin) * w;
+    const x2 = (Math.log10(Math.min(band.fmax, fMax)) - logMin) / (logMax - logMin) * w;
+    ctx.fillStyle = band.color + '0d';
+    ctx.fillRect(x1, 0, x2 - x1, h);
+  });
+  
+  // Target ghost line
+  if (state.target) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+    ctx.lineWidth = 2 * devicePixelRatio;
+    ctx.setLineDash([6 * devicePixelRatio, 4 * devicePixelRatio]);
+    ctx.beginPath();
+    let started = false;
+    for (let i = 0; i < state.target.spectrum.length; i++) {
+      const freq = i / state.target.spectrum.length * (state.audioCtx.sampleRate / 2);
+      if (freq < fMin || freq > fMax) continue;
+      const db = state.target.spectrum[i];
+      if (!isFinite(db)) continue;
+      const x = (Math.log10(freq) - logMin) / (logMax - logMin) * w;
+      const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
+      if (!started) { ctx.moveTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  
+  // Current spectrum by band
+  for (let bandIdx = 0; bandIdx < state.bands.length; bandIdx++) {
+    const band = state.bands[bandIdx];
+    ctx.strokeStyle = band.color;
+    ctx.fillStyle = band.color + '33';
+    ctx.lineWidth = 1.5 * devicePixelRatio;
+    
+    ctx.beginPath();
+    let started = false;
+    let lastX = 0;
+    
+    for (let i = 0; i < state.smoothedSpectrum.length; i++) {
+      const freq = i / state.smoothedSpectrum.length * (state.audioCtx.sampleRate / 2);
+      if (freq < band.fmin || freq > band.fmax) continue;
+      if (freq < fMin || freq > fMax) continue;
+      const db = state.smoothedSpectrum[i];
+      if (!isFinite(db)) continue;
+      const x = (Math.log10(freq) - logMin) / (logMax - logMin) * w;
+      const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
+      if (!started) { ctx.moveTo(x, h); ctx.lineTo(x, y); started = true; }
+      else ctx.lineTo(x, y);
+      lastX = x;
+    }
+    if (started) {
+      ctx.lineTo(lastX, h);
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.beginPath();
+      let s = false;
+      for (let i = 0; i < state.smoothedSpectrum.length; i++) {
+        const freq = i / state.smoothedSpectrum.length * (state.audioCtx.sampleRate / 2);
+        if (freq < band.fmin || freq > band.fmax) continue;
+        if (freq < fMin || freq > fMax) continue;
+        const db = state.smoothedSpectrum[i];
+        if (!isFinite(db)) continue;
+        const x = (Math.log10(freq) - logMin) / (logMax - logMin) * w;
+        const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
+        if (!s) { ctx.moveTo(x, y); s = true; }
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+  }
+}
+
+function buildBands() {
+  const row = $('bandsRow');
+  row.innerHTML = '';
+  row.className = 'bands-row ' + (state.bandMode === 3 ? 'three' : 'four');
+  
+  state.bands.forEach((band, i) => {
+    const div = document.createElement('div');
+    div.className = 'band';
+    div.innerHTML = `
+      <div class="band-header">
+        <span class="band-name" style="color:${band.color}">${band.name}</span>
+        <span class="band-freq">${band.freq}</span>
+      </div>
+      <div class="band-meter">
+        <div class="band-fill" id="band-fill-${i}"></div>
+        <div class="band-target-line" id="band-target-${i}"></div>
+      </div>
+      <div class="band-values">
+        <span class="band-current" id="band-value-${i}">— dB</span>
+        <span class="band-delta" id="band-delta-${i}">—</span>
+      </div>
+    `;
+    row.appendChild(div);
+  });
+}
+
+// ============ PERSISTENCE ============
+function persistState() {
+  try {
+    const data = {
+      bandMode: state.bandMode,
+      windowMinutes: state.windowMinutes,
+      autoLock: state.autoLock,
+      smooth: $('smoothSlider').value,
+      gain: $('gainSlider').value,
+      notation: state.notation,
+      selectedKey: state.selectedKey ? state.selectedKey.camelot : null,
+      target: state.target ? {
+        spectrum: Array.from(state.target.spectrum),
+        bandLevels: state.target.bandLevels,
+        lufs: state.target.lufs,
+        peak: state.target.peak,
+        rms: state.target.rms,
+        crest: state.target.crest,
+        timestamp: state.target.timestamp,
+        isAuto: state.target.isAuto
+      } : null
+    };
+    localStorage.setItem('dj-tool-state', JSON.stringify(data));
+  } catch (e) {}
+}
+
+function loadPersistedState() {
+  try {
+    const raw = localStorage.getItem('dj-tool-state');
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    
+    if (data.bandMode) {
+      state.bandMode = data.bandMode;
+      state.bands = data.bandMode === 3 ? CONFIG.bands3 : CONFIG.bands4;
+      $('modeBtn').textContent = data.bandMode + '-Band';
+      buildBands();
+    }
+    if (data.windowMinutes) {
+      state.windowMinutes = data.windowMinutes;
+      $('windowSlider').value = data.windowMinutes;
+      $('windowValue').textContent = data.windowMinutes + 'min';
+    }
+    if (data.autoLock !== undefined) {
+      state.autoLock = data.autoLock;
+      $('autoLockBtn').textContent = 'Auto: ' + (data.autoLock ? 'ON' : 'OFF');
+      $('autoLockBtn').classList.toggle('active', data.autoLock);
+    }
+    if (data.smooth) {
+      $('smoothSlider').value = data.smooth;
+      $('smoothValue').textContent = (data.smooth / 100).toFixed(2);
+    }
+    if (data.gain) {
+      $('gainSlider').value = data.gain;
+      $('gainValue').textContent = data.gain + 'dB';
+      state.gainDb = parseFloat(data.gain);
+      if (state.gainNode) state.gainNode.gain.value = Math.pow(10, state.gainDb / 20);
+    }
+    if (data.notation) {
+      state.notation = data.notation;
+      document.querySelectorAll('.notation-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.notation === state.notation);
+      });
+      document.querySelectorAll('.key-cell').forEach(cell => {
+        const key = getKeyByCamelot(cell.dataset.camelot);
+        if (key) cell.textContent = getKeyLabel(key);
+      });
+    }
+    if (data.selectedKey) {
+      state.selectedKey = getKeyByCamelot(data.selectedKey);
+      const cell = document.querySelector(`.key-cell[data-camelot="${data.selectedKey}"]`);
+      if (cell) cell.classList.add('selected');
+      renderCompatibility();
+    }
+    if (data.target) {
+      state.target = {
+        ...data.target,
+        spectrum: new Float32Array(data.target.spectrum)
+      };
+    }
+  } catch (e) {}
+}
+
+// ============ WAKE LOCK ============
+let wakeLock = null;
+async function requestWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && state.running) requestWakeLock();
+});
+
+// ============ EVENT HANDLERS ============
+$('startBtn').addEventListener('click', async () => {
+  const ok = await startAudio();
+  if (ok) {
+    $('startOverlay').style.display = 'none';
+    // Auto-start BPM detection
+    state.bpmDetecting = true;
+    $('autoBpmStart').textContent = '⏸ Stop Detect';
+    $('autoBpmStart').classList.add('active');
+  }
+});
+
+$('startNoAudioBtn').addEventListener('click', () => {
+  $('startOverlay').style.display = 'none';
+  startNoAudio();
+});
+
+$('lockBtn').addEventListener('click', () => lockTarget(false));
+$('clearBtn').addEventListener('click', clearTarget);
+
+$('modeBtn').addEventListener('click', () => {
+  state.bandMode = state.bandMode === 3 ? 4 : 3;
+  state.bands = state.bandMode === 3 ? CONFIG.bands3 : CONFIG.bands4;
+  $('modeBtn').textContent = state.bandMode + '-Band';
+  if (state.target) state.target.bandLevels = getAllBandLevels(state.target.spectrum);
+  buildBands();
+  persistState();
+});
+
+$('autoLockBtn').addEventListener('click', () => {
+  state.autoLock = !state.autoLock;
+  $('autoLockBtn').textContent = 'Auto: ' + (state.autoLock ? 'ON' : 'OFF');
+  $('autoLockBtn').classList.toggle('active', state.autoLock);
+  persistState();
+});
+
+$('windowSlider').addEventListener('input', (e) => {
+  state.windowMinutes = parseInt(e.target.value);
+  $('windowValue').textContent = state.windowMinutes + 'min';
+  persistState();
+});
+
+$('smoothSlider').addEventListener('input', (e) => {
+  $('smoothValue').textContent = (e.target.value / 100).toFixed(2);
+  persistState();
+});
+
+$('gainSlider').addEventListener('input', (e) => {
+  const db = parseFloat(e.target.value);
+  state.gainDb = db;
+  $('gainValue').textContent = db + 'dB';
+  if (state.gainNode) state.gainNode.gain.value = Math.pow(10, db / 20);
+  persistState();
+});
+
+// BPM
+$('autoBpmStart').addEventListener('click', () => {
+  if (!state.audioCtx) {
+    alert('Necesitás iniciar con audio para detección automática.');
+    return;
+  }
+  state.bpmDetecting = !state.bpmDetecting;
+  if (state.bpmDetecting) {
+    state.bpmPeaks = [];
+    state.bpmEnergyHistory = [];
+    $('autoBpmStart').textContent = '⏸ Stop Detect';
+    $('autoBpmStart').classList.add('active');
+  } else {
+    $('autoBpmStart').textContent = '▶ Start Detect';
+    $('autoBpmStart').classList.remove('active');
+  }
+});
+
+$('autoBpmHalf').addEventListener('click', () => {
+  if (state.bpmCurrentValue) {
+    state.bpmCurrentValue = state.bpmCurrentValue / 2;
+    updateBpmDisplay();
+  }
+});
+
+$('autoBpmDouble').addEventListener('click', () => {
+  if (state.bpmCurrentValue) {
+    state.bpmCurrentValue = state.bpmCurrentValue * 2;
+    updateBpmDisplay();
+  }
+});
+
+// Tap tempo - support touch and click
+const tapPad = $('tapPad');
+let lastTapTime = 0;
+tapPad.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
+  const now = performance.now();
+  if (now - lastTapTime < 50) return; // debounce
+  lastTapTime = now;
+  handleTap();
+});
+
+// Spacebar tap support on desktop
+document.addEventListener('keydown', (e) => {
+  if (e.code === 'Space' && document.querySelector('.tab[data-tab="bpm"].active')) {
+    e.preventDefault();
+    handleTap();
+  }
+});
+
+$('tapReset').addEventListener('click', resetTap);
+
+$('tapUseAsBpm').addEventListener('click', () => {
+  if (state.tapTimes.length >= 4) {
+    const intervals = [];
+    for (let i = 1; i < state.tapTimes.length; i++) {
+      intervals.push(state.tapTimes[i] - state.tapTimes[i-1]);
+    }
+    const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const bpm = 60000 / avg;
+    state.bpmCurrentValue = bpm;
+    state.bpmConfidence = 100;
+    state.bpmAlternatives = [];
+    updateBpmDisplay();
+    $('autoBpmValue').textContent = bpm.toFixed(1);
+  } else {
+    alert('Tocá al menos 4 veces antes de usar como BPM principal.');
+  }
+});
+
+// ============ INIT ============
+buildBands();
+buildKeyGrid();
+</script>
+</body>
+</html>
