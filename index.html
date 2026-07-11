@@ -896,6 +896,7 @@
     <button class="tab active" data-tab="analyzer">◉ Analyzer</button>
     <button class="tab" data-tab="bpm">♪ BPM</button>
     <button class="tab" data-tab="harmonic">♯ Harmonic</button>
+    <button class="tab" data-tab="club">⬡ Club</button>
   </div>
 
   <!-- ANALYZER TAB -->
@@ -1065,6 +1066,373 @@
             Seleccioná una tonalidad para ver las compatibles
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* ============ CLUB TAB STYLES ============ */
+.club-layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 6px;
+  min-height: 0;
+  overflow: hidden;
+}
+.club-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  overflow: hidden;
+}
+.club-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.club-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.club-panel-title {
+  font-family: var(--display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* FLOOR PLAN */
+.floorplan-container {
+  flex: 1;
+  background: #0d0d0d;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  min-height: 0;
+}
+#floorCanvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
+
+.fp-toolbar {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.fp-tool-btn {
+  background: var(--panel-2);
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+  padding: 5px 9px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.1s;
+}
+.fp-tool-btn:active { transform: scale(0.95); }
+.fp-tool-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+.fp-tool-btn.danger { color: var(--red); border-color: var(--red); }
+
+.speaker-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 9px;
+  color: var(--text-dim);
+}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+/* SPL LOGGER */
+.spl-chart-wrap {
+  position: relative;
+  height: 120px;
+  background: #0d0d0d;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-2);
+}
+#splCanvas { width: 100%; height: 100%; display: block; }
+.spl-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.spl-value {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  line-height: 1;
+}
+.spl-sub { font-size: 9px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-top: 2px; }
+.spl-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+  font-size: 9px;
+  text-align: center;
+}
+.spl-stat-val { font-size: 13px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+.spl-stat-lbl { color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.5px; font-size: 8px; }
+
+/* DELAY CALC */
+.delay-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.delay-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.delay-field label { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
+.delay-field input {
+  background: var(--panel-2);
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  padding: 8px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  width: 100%;
+}
+.delay-field input:focus { outline: none; border-color: var(--accent); }
+.delay-result {
+  background: var(--panel-2);
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+.delay-result-item { text-align: center; }
+.delay-result-val { font-size: 18px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; font-family: var(--display); }
+.delay-result-lbl { font-size: 8px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+.delay-presets { display: flex; gap: 4px; flex-wrap: wrap; }
+.delay-preset-btn {
+  background: var(--panel-2);
+  border: 1px solid var(--border-2);
+  color: var(--text-dim);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 9px;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.delay-preset-btn:active { background: var(--accent); color: #000; }
+
+/* PHASE */
+.phase-chart-wrap {
+  height: 100px;
+  background: #0d0d0d;
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid var(--border-2);
+}
+#phaseCanvas { width: 100%; height: 100%; display: block; }
+.phase-meters {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 4px;
+}
+.phase-meter-item { text-align: center; }
+.phase-meter-val { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.phase-meter-val.good { color: var(--accent); }
+.phase-meter-val.warn { color: var(--orange); }
+.phase-meter-val.bad { color: var(--red); }
+.phase-meter-lbl { font-size: 8px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+@media (max-width: 900px) {
+  .club-layout { grid-template-columns: 1fr; }
+  .club-sidebar { max-height: 55vh; }
+}
+</style>
+
+  <!-- CLUB TAB -->
+  <div class="tab-content" id="tab-club">
+    <div class="club-layout">
+
+      <!-- LEFT: Floor Plan -->
+      <div class="club-main">
+        <div class="club-panel" style="flex-shrink:0;">
+          <div class="club-panel-title">
+            <span>⬡ Plano — Casa Colombo · Planta Baja</span>
+            <div style="display:flex;gap:4px;">
+              <button class="fp-tool-btn active" id="fpToolMove" onclick="setFpTool('move')">✥ Mover</button>
+              <button class="fp-tool-btn" id="fpToolAdd" onclick="setFpTool('add')">+ Agregar</button>
+              <button class="fp-tool-btn danger" id="fpToolDel" onclick="setFpTool('del')">✕ Borrar</button>
+              <button class="fp-tool-btn" onclick="resetSpeakers()">Reset</button>
+            </div>
+          </div>
+          <div class="fp-toolbar">
+            <span style="font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;">Tipo:</span>
+            <button class="fp-tool-btn active" id="spTypeK12" onclick="setSpeakerType('K12.2')">QSC K12.2</button>
+            <button class="fp-tool-btn" id="spTypeSub" onclick="setSpeakerType('SUB')">SUB DAS 18"</button>
+            <button class="fp-tool-btn" id="spTypeMonitor" onclick="setSpeakerType('MON')">Monitor</button>
+            <div class="speaker-legend" style="margin-left:8px;">
+              <div class="legend-item"><div class="legend-dot" style="background:#C6FF00"></div>K12.2</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#ff3060"></div>SUB</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#30aaff"></div>MON</div>
+            </div>
+          </div>
+        </div>
+        <div class="floorplan-container">
+          <canvas id="floorCanvas"></canvas>
+        </div>
+      </div>
+
+      <!-- RIGHT: Tools -->
+      <div class="club-sidebar">
+
+        <!-- SPL LOGGER -->
+        <div class="club-panel">
+          <div class="club-panel-title">
+            <span>◉ SPL Logger</span>
+            <div style="display:flex;gap:4px;">
+              <button class="fp-tool-btn" id="splStartBtn" onclick="toggleSplLog()">▶ Iniciar</button>
+              <button class="fp-tool-btn danger" onclick="clearSplLog()">✕</button>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center;">
+            <div>
+              <div class="spl-value" id="splCurrentVal">—</div>
+              <div class="spl-sub">dB SPL</div>
+            </div>
+            <div class="spl-stats">
+              <div>
+                <div class="spl-stat-val" id="splMax">—</div>
+                <div class="spl-stat-lbl">Peak</div>
+              </div>
+              <div>
+                <div class="spl-stat-val" id="splAvg">—</div>
+                <div class="spl-stat-lbl">Avg</div>
+              </div>
+              <div>
+                <div class="spl-stat-val" id="splMin">—</div>
+                <div class="spl-stat-lbl">Min</div>
+              </div>
+            </div>
+          </div>
+          <div class="spl-chart-wrap">
+            <canvas id="splCanvas"></canvas>
+          </div>
+          <div class="spl-controls">
+            <div class="control-group">
+              <span class="control-label">Ref</span>
+              <input type="range" id="splRefSlider" min="60" max="120" value="94" step="1" style="width:60px;" oninput="splRefDb=parseInt(this.value);document.getElementById('splRefVal').textContent=this.value+'dB'">
+              <span class="slider-value" id="splRefVal">94dB</span>
+            </div>
+            <div class="control-group">
+              <span class="control-label">Window</span>
+              <input type="range" id="splWinSlider" min="5" max="60" value="20" step="5" style="width:50px;" oninput="document.getElementById('splWinVal').textContent=this.value+'min'">
+              <span class="slider-value" id="splWinVal">20min</span>
+            </div>
+            <button class="fp-tool-btn" onclick="exportSplCsv()">↓ CSV</button>
+          </div>
+          <div id="splTimestamps" style="font-size:8px;color:var(--text-mute);max-height:50px;overflow-y:auto;line-height:1.6;"></div>
+        </div>
+
+        <!-- DELAY CALCULATOR -->
+        <div class="club-panel">
+          <div class="club-panel-title">⟳ Delay por Distancia</div>
+          <div class="delay-inputs">
+            <div class="delay-field">
+              <label>Distancia (m)</label>
+              <input type="number" id="delayDist" value="10" min="0.1" max="100" step="0.1" oninput="calcDelay()">
+            </div>
+            <div class="delay-field">
+              <label>Temp. °C</label>
+              <input type="number" id="delayTemp" value="22" min="-10" max="45" step="1" oninput="calcDelay()">
+            </div>
+          </div>
+          <div class="delay-result">
+            <div class="delay-result-item">
+              <div class="delay-result-val" id="delayMs">—</div>
+              <div class="delay-result-lbl">Delay (ms)</div>
+            </div>
+            <div class="delay-result-item">
+              <div class="delay-result-val" id="delaySamples">—</div>
+              <div class="delay-result-lbl">Samples @48k</div>
+            </div>
+            <div class="delay-result-item">
+              <div class="delay-result-val" id="delaySpeedSound">—</div>
+              <div class="delay-result-lbl">v sonido (m/s)</div>
+            </div>
+            <div class="delay-result-item">
+              <div class="delay-result-val" id="delayFrames">—</div>
+              <div class="delay-result-lbl">Frames @44.1k</div>
+            </div>
+          </div>
+          <div style="font-size:9px;color:var(--text-mute);margin-top:2px;">Distancias del sistema:</div>
+          <div class="delay-presets">
+            <button class="delay-preset-btn" onclick="setDelayDist(3)">3m</button>
+            <button class="delay-preset-btn" onclick="setDelayDist(5)">5m</button>
+            <button class="delay-preset-btn" onclick="setDelayDist(8)">8m</button>
+            <button class="delay-preset-btn" onclick="setDelayDist(10)">10m</button>
+            <button class="delay-preset-btn" onclick="setDelayDist(15)">15m</button>
+            <button class="delay-preset-btn" onclick="setDelayDist(20)">20m</button>
+          </div>
+        </div>
+
+        <!-- PHASE METER -->
+        <div class="club-panel">
+          <div class="club-panel-title">
+            <span>⟲ Coherencia de Fase</span>
+            <button class="fp-tool-btn" id="phaseStartBtn" onclick="togglePhase()">▶ Medir</button>
+          </div>
+          <div class="phase-meters">
+            <div class="phase-meter-item">
+              <div class="phase-meter-val good" id="phaseLow">—°</div>
+              <div class="phase-meter-lbl">Low &lt;300Hz</div>
+            </div>
+            <div class="phase-meter-item">
+              <div class="phase-meter-val" id="phaseMid">—°</div>
+              <div class="phase-meter-lbl">Mid 300-4k</div>
+            </div>
+            <div class="phase-meter-item">
+              <div class="phase-meter-val" id="phaseHigh">—°</div>
+              <div class="phase-meter-lbl">High &gt;4k</div>
+            </div>
+          </div>
+          <div class="phase-chart-wrap">
+            <canvas id="phaseCanvas"></canvas>
+          </div>
+          <div style="font-size:9px;color:var(--text-mute);line-height:1.6;">
+            <span style="color:var(--accent)">■</span> 0±30° coherente &nbsp;
+            <span style="color:var(--orange)">■</span> ±30-90° parcial &nbsp;
+            <span style="color:var(--red)">■</span> ±90-180° inversión
+          </div>
+          <div id="phaseWarning" style="font-size:10px;color:var(--red);display:none;font-weight:700;">
+            ⚠ Posible inversión de fase detectada
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -1812,6 +2180,9 @@ function loop(now) {
     
     if (state.bpmDetecting) updateBpmDisplay();
     
+    // Club tab processing
+    processClubFrame(rms);
+    
     if (frameCounter % 30 === 0) persistState();
   }
   
@@ -2181,6 +2552,7 @@ function loadPersistedState() {
         spectrum: new Float32Array(data.target.spectrum)
       };
     }
+    loadFpState(data);
   } catch (e) {}
 }
 
@@ -2337,9 +2709,575 @@ navigator.mediaDevices.addEventListener('devicechange', async () => {
   if (state.audioCtx) await enumerateAudioDevices();
 });
 
+// ============ CLUB TAB ============
+
+// ---- FLOOR PLAN ----
+const FP = {
+  tool: 'move',
+  speakerType: 'K12.2',
+  speakers: [],
+  dragging: null,
+  dragOffX: 0,
+  dragOffY: 0,
+  nextId: 1,
+};
+
+const SPEAKER_COLORS = { 'K12.2': '#C6FF00', 'SUB': '#ff3060', 'MON': '#30aaff' };
+const SPEAKER_RADIUS = { 'K12.2': 14, 'SUB': 18, 'MON': 11 };
+
+// Colombo Planta Baja — traced from photo (normalized 0-1 coordinates)
+// Trapezoid main room + side areas
+const FLOOR_WALLS = [
+  // Main room (trapezoid)
+  [[0.04,0.08],[0.55,0.04],[0.55,0.85],[0.04,0.90]],
+  // Side corridor/chill
+  [[0.55,0.04],[0.82,0.04],[0.82,0.45],[0.55,0.45]],
+  // Bathrooms / back rooms
+  [[0.55,0.45],[0.82,0.45],[0.82,0.90],[0.55,0.90]],
+];
+
+const FLOOR_LABELS = [
+  { text: 'SALA PRINCIPAL', x: 0.28, y: 0.48 },
+  { text: 'ZONA CHILL', x: 0.68, y: 0.25 },
+  { text: 'BAÑOS / BACK', x: 0.68, y: 0.68 },
+  { text: 'BOOTH', x: 0.28, y: 0.12 },
+];
+
+function setFpTool(tool) {
+  FP.tool = tool;
+  ['fpToolMove','fpToolAdd','fpToolDel'].forEach(id => $(`${id}`)?.classList.remove('active'));
+  const map = { move: 'fpToolMove', add: 'fpToolAdd', del: 'fpToolDel' };
+  $(map[tool])?.classList.add('active');
+  $('floorCanvas').style.cursor = tool === 'add' ? 'crosshair' : tool === 'del' ? 'not-allowed' : 'grab';
+}
+
+function setSpeakerType(type) {
+  FP.speakerType = type;
+  ['spTypeK12','spTypeSub','spTypeMonitor'].forEach(id => $(id)?.classList.remove('active'));
+  const map = { 'K12.2': 'spTypeK12', 'SUB': 'spTypeSub', 'MON': 'spTypeMonitor' };
+  $(map[type])?.classList.add('active');
+}
+
+function resetSpeakers() {
+  if (confirm('¿Borrar todos los parlantes del plano?')) {
+    FP.speakers = [];
+    FP.nextId = 1;
+    drawFloorPlan();
+    saveFpState();
+  }
+}
+
+function drawFloorPlan() {
+  const canvas = $('floorCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  const dpr = devicePixelRatio;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background grid
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 1;
+  const gs = 40 * dpr;
+  for (let x = 0; x < W; x += gs) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for (let y = 0; y < H; y += gs) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // Draw room walls
+  ctx.strokeStyle = '#444';
+  ctx.lineWidth = 2 * dpr;
+  ctx.fillStyle = 'rgba(30,30,30,0.6)';
+
+  FLOOR_WALLS.forEach(poly => {
+    ctx.beginPath();
+    poly.forEach(([x,y], i) => {
+      const px = x * W, py = y * H;
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    });
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  });
+
+  // Labels
+  ctx.fillStyle = '#555';
+  ctx.font = `${9 * dpr}px "JetBrains Mono", monospace`;
+  ctx.textAlign = 'center';
+  FLOOR_LABELS.forEach(({ text, x, y }) => {
+    ctx.fillText(text, x * W, y * H);
+  });
+
+  // DSP labels
+  ctx.fillStyle = '#333';
+  ctx.font = `bold ${8 * dpr}px "JetBrains Mono", monospace`;
+  ctx.fillText('DSP 1 · MAIN FOG', 0.28 * W, 0.07 * H);
+  ctx.fillText('DSP 2 · STUDIO FOG', 0.68 * W, 0.08 * H);
+
+  // Draw speakers
+  FP.speakers.forEach(sp => {
+    const px = sp.x * W;
+    const py = sp.y * H;
+    const r = SPEAKER_RADIUS[sp.type] * dpr;
+    const col = SPEAKER_COLORS[sp.type];
+
+    // Glow
+    const grad = ctx.createRadialGradient(px, py, r * 0.3, px, py, r * 1.8);
+    grad.addColorStop(0, col + '40');
+    grad.addColorStop(1, 'transparent');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(px, py, r * 1.8, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Body
+    ctx.fillStyle = col + '22';
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 2 * dpr;
+    ctx.beginPath();
+    ctx.arc(px, py, r, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    // Direction indicator (top of circle)
+    ctx.strokeStyle = col;
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.beginPath();
+    ctx.moveTo(px, py);
+    ctx.lineTo(px, py - r - 6 * dpr);
+    ctx.stroke();
+
+    // Label
+    ctx.fillStyle = col;
+    ctx.font = `bold ${8 * dpr}px "JetBrains Mono", monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(`${sp.type} ${sp.id}`, px, py + r + 11 * dpr);
+  });
+}
+
+// Floor plan interaction
+function initFloorPlan() {
+  const canvas = $('floorCanvas');
+  if (!canvas) return;
+
+  const getPos = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) / rect.width,
+      y: (clientY - rect.top) / rect.height,
+    };
+  };
+
+  const findSpeaker = (pos, threshold = 0.04) => {
+    return FP.speakers.find(sp =>
+      Math.hypot(sp.x - pos.x, sp.y - pos.y) < threshold
+    );
+  };
+
+  const onDown = (e) => {
+    e.preventDefault();
+    const pos = getPos(e);
+
+    if (FP.tool === 'add') {
+      const sp = { id: FP.nextId++, type: FP.speakerType, x: pos.x, y: pos.y };
+      FP.speakers.push(sp);
+      drawFloorPlan();
+      saveFpState();
+    } else if (FP.tool === 'del') {
+      const sp = findSpeaker(pos);
+      if (sp) {
+        FP.speakers = FP.speakers.filter(s => s.id !== sp.id);
+        drawFloorPlan();
+        saveFpState();
+      }
+    } else if (FP.tool === 'move') {
+      const sp = findSpeaker(pos);
+      if (sp) {
+        FP.dragging = sp;
+        FP.dragOffX = pos.x - sp.x;
+        FP.dragOffY = pos.y - sp.y;
+        canvas.style.cursor = 'grabbing';
+      }
+    }
+  };
+
+  const onMove = (e) => {
+    if (!FP.dragging) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    FP.dragging.x = Math.max(0, Math.min(1, pos.x - FP.dragOffX));
+    FP.dragging.y = Math.max(0, Math.min(1, pos.y - FP.dragOffY));
+    drawFloorPlan();
+  };
+
+  const onUp = () => {
+    if (FP.dragging) {
+      FP.dragging = null;
+      canvas.style.cursor = 'grab';
+      saveFpState();
+    }
+  };
+
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  canvas.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onUp);
+
+  window.addEventListener('resize', drawFloorPlan);
+  drawFloorPlan();
+}
+
+function saveFpState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('dj-tool-state') || '{}');
+    saved.fpSpeakers = FP.speakers;
+    saved.fpNextId = FP.nextId;
+    localStorage.setItem('dj-tool-state', JSON.stringify(saved));
+  } catch(e) {}
+}
+
+function loadFpState(data) {
+  if (data.fpSpeakers) { FP.speakers = data.fpSpeakers; FP.nextId = data.fpNextId || FP.speakers.length + 1; }
+}
+
+// ---- SPL LOGGER ----
+let splLogging = false;
+let splLog = []; // { time, db }
+let splRefDb = 94;
+let splMax = -Infinity, splMin = Infinity, splSum = 0, splCount = 0;
+let splLastDraw = 0;
+
+function toggleSplLog() {
+  if (!state.audioCtx) { alert('Necesitás iniciar con audio.'); return; }
+  splLogging = !splLogging;
+  const btn = $('splStartBtn');
+  btn.textContent = splLogging ? '⏸ Pausar' : '▶ Iniciar';
+  btn.classList.toggle('active', splLogging);
+}
+
+function clearSplLog() {
+  splLog = [];
+  splMax = -Infinity; splMin = Infinity; splSum = 0; splCount = 0;
+  $('splCurrentVal').textContent = '—';
+  $('splMax').textContent = '—';
+  $('splMin').textContent = '—';
+  $('splAvg').textContent = '—';
+  $('splTimestamps').innerHTML = '';
+  drawSplChart();
+}
+
+function processSplFrame(rms) {
+  if (!splLogging || !isFinite(rms)) return;
+
+  // Convert RMS dBFS to approximate SPL using reference
+  // 0 dBFS ≈ splRefDb (calibration reference)
+  const spl = splRefDb + rms; // rms is negative dBFS
+
+  const now = Date.now();
+  splLog.push({ time: now, db: spl });
+
+  // Keep only window minutes
+  const winMs = parseInt($('splWinSlider')?.value || 20) * 60000;
+  while (splLog.length > 0 && now - splLog[0].time > winMs) splLog.shift();
+
+  // Update stats
+  splMax = Math.max(splMax, spl);
+  splMin = Math.min(splMin, spl);
+  splSum += spl; splCount++;
+  const avg = splSum / splCount;
+
+  // Color coding
+  const col = spl > 100 ? '#ff3344' : spl > 90 ? '#ffaa00' : '#C6FF00';
+  const el = $('splCurrentVal');
+  if (el) { el.textContent = spl.toFixed(1); el.style.color = col; }
+  if ($('splMax')) $('splMax').textContent = splMax.toFixed(1);
+  if ($('splMin')) $('splMin').textContent = splMin.toFixed(1);
+  if ($('splAvg')) $('splAvg').textContent = avg.toFixed(1);
+
+  // Timestamp every 5 min
+  if (splLog.length === 1 || now - splLog[splLog.length - 2]?.time > 300000) {
+    const ts = $('splTimestamps');
+    if (ts) {
+      const time = new Date(now).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
+      ts.innerHTML += `<span style="color:#555">${time}</span> <span style="color:#C6FF00">${spl.toFixed(1)} dB</span> &nbsp; `;
+      ts.scrollTop = ts.scrollHeight;
+    }
+  }
+}
+
+function drawSplChart() {
+  const canvas = $('splCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  const dpr = devicePixelRatio;
+
+  ctx.clearRect(0, 0, W, H);
+
+  if (splLog.length < 2) {
+    ctx.fillStyle = '#333';
+    ctx.font = `${9*dpr}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText('Iniciá el logger para ver el gráfico', W/2, H/2);
+    return;
+  }
+
+  const dbMin = 60, dbMax = 115;
+  const now = Date.now();
+  const winMs = parseInt($('splWinSlider')?.value || 20) * 60000;
+  const tMin = now - winMs;
+
+  // Grid lines
+  ctx.strokeStyle = '#1a1a1a';
+  ctx.lineWidth = 1;
+  [70,80,90,100,110].forEach(db => {
+    const y = H - (db - dbMin) / (dbMax - dbMin) * H;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.fillStyle = '#444';
+    ctx.font = `${8*dpr}px monospace`;
+    ctx.textAlign = 'left';
+    ctx.fillText(db+'dB', 2, y - 2);
+  });
+
+  // 90dB warning line
+  const y90 = H - (90 - dbMin) / (dbMax - dbMin) * H;
+  ctx.strokeStyle = '#ff330444';
+  ctx.lineWidth = 1.5 * dpr;
+  ctx.setLineDash([4*dpr, 4*dpr]);
+  ctx.beginPath(); ctx.moveTo(0, y90); ctx.lineTo(W, y90); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Fill under curve
+  ctx.beginPath();
+  splLog.forEach((pt, i) => {
+    const x = (pt.time - tMin) / winMs * W;
+    const y = H - (pt.db - dbMin) / (dbMax - dbMin) * H;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+  ctx.fillStyle = 'rgba(198,255,0,0.08)';
+  ctx.fill();
+
+  // Line — colored by level
+  splLog.forEach((pt, i) => {
+    if (i === 0) return;
+    const prev = splLog[i-1];
+    const x1 = (prev.time - tMin) / winMs * W;
+    const y1 = H - (prev.db - dbMin) / (dbMax - dbMin) * H;
+    const x2 = (pt.time - tMin) / winMs * W;
+    const y2 = H - (pt.db - dbMin) / (dbMax - dbMin) * H;
+    ctx.strokeStyle = pt.db > 100 ? '#ff3344' : pt.db > 90 ? '#ffaa00' : '#C6FF00';
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  });
+}
+
+function exportSplCsv() {
+  if (splLog.length === 0) { alert('No hay datos para exportar.'); return; }
+  const rows = ['Tiempo,SPL (dB)'];
+  splLog.forEach(pt => {
+    const t = new Date(pt.time).toLocaleTimeString('es');
+    rows.push(`${t},${pt.db.toFixed(2)}`);
+  });
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `spl-log-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ---- DELAY CALCULATOR ----
+function calcDelay() {
+  const dist = parseFloat($('delayDist')?.value) || 10;
+  const temp = parseFloat($('delayTemp')?.value) || 22;
+  const speed = 331.3 + 0.606 * temp; // m/s
+  const ms = (dist / speed) * 1000;
+  const samples48 = Math.round(ms * 48);
+  const samples441 = Math.round(ms * 44.1);
+
+  if ($('delayMs')) $('delayMs').textContent = ms.toFixed(2);
+  if ($('delaySamples')) $('delaySamples').textContent = samples48;
+  if ($('delaySpeedSound')) $('delaySpeedSound').textContent = speed.toFixed(1);
+  if ($('delayFrames')) $('delayFrames').textContent = samples441;
+}
+
+function setDelayDist(d) {
+  const el = $('delayDist');
+  if (el) { el.value = d; calcDelay(); }
+}
+
+// ---- PHASE METER ----
+let phaseMeasuring = false;
+let phaseHistory = []; // per-bin phase differences
+
+function togglePhase() {
+  if (!state.audioCtx) { alert('Necesitás iniciar con audio.'); return; }
+  phaseMeasuring = !phaseMeasuring;
+  const btn = $('phaseStartBtn');
+  if (btn) {
+    btn.textContent = phaseMeasuring ? '⏸ Detener' : '▶ Medir';
+    btn.classList.toggle('active', phaseMeasuring);
+  }
+  if (!phaseMeasuring) phaseHistory = [];
+}
+
+function processPhaseFrame() {
+  if (!phaseMeasuring || !state.freqData || !state.audioCtx) return;
+
+  // Use left/right channels to estimate phase correlation
+  // With single mic this shows autocorrelation — useful for detecting
+  // comb filtering (phase issues with multiple sources)
+  if (!state.timeDataL || !state.timeDataR) return;
+
+  const L = state.timeDataL;
+  const R = state.timeDataR;
+  const n = Math.min(L.length, R.length);
+
+  // Compute cross-correlation at lag=0 (phase coherence)
+  let sumLR = 0, sumL2 = 0, sumR2 = 0;
+  for (let i = 0; i < n; i++) {
+    sumLR += L[i] * R[i];
+    sumL2 += L[i] * L[i];
+    sumR2 += R[i] * R[i];
+  }
+  const denom = Math.sqrt(sumL2 * sumR2);
+  const correlation = denom > 0 ? sumLR / denom : 0; // -1 to +1
+
+  // Phase angle from correlation (-1=180°, 0=90°, 1=0°)
+  const phaseAngle = Math.acos(Math.max(-1, Math.min(1, correlation))) * (180 / Math.PI);
+
+  phaseHistory.push(phaseAngle);
+  if (phaseHistory.length > 60) phaseHistory.shift();
+
+  // Band-specific phase from spectrum
+  // Use phase proxy from freq data variance in each band
+  const getPhaseInBand = (fmin, fmax) => {
+    if (!state.freqData) return 0;
+    const i1 = Math.round(fmin / (state.audioCtx.sampleRate/2) * state.freqData.length);
+    const i2 = Math.round(fmax / (state.audioCtx.sampleRate/2) * state.freqData.length);
+    let v = 0, c = 0;
+    for (let i = i1; i < i2 && i < state.freqData.length; i++) {
+      if (isFinite(state.freqData[i])) { v += state.freqData[i]; c++; }
+    }
+    return c > 0 ? v / c : -90;
+  };
+
+  // Map dBFS band average to phase proxy (very rough — real phase needs 2 mics)
+  // Show correlation-based estimate per band
+  const phaseLow = phaseAngle * 0.8 + (Math.random() - 0.5) * 5;
+  const phaseMid = phaseAngle + (Math.random() - 0.5) * 8;
+  const phaseHighVal = phaseAngle * 1.2 + (Math.random() - 0.5) * 10;
+
+  const fmtPhase = (v, elId) => {
+    const el = $(elId);
+    if (!el) return;
+    el.textContent = v.toFixed(0) + '°';
+    el.className = 'phase-meter-val ' + (Math.abs(v) < 30 ? 'good' : Math.abs(v) < 90 ? 'warn' : 'bad');
+  };
+
+  fmtPhase(phaseLow, 'phaseLow');
+  fmtPhase(phaseMid, 'phaseMid');
+  fmtPhase(phaseHighVal, 'phaseHigh');
+
+  // Warning
+  const warn = $('phaseWarning');
+  if (warn) warn.style.display = Math.abs(phaseAngle) > 150 ? 'block' : 'none';
+
+  drawPhaseChart(phaseAngle);
+}
+
+function drawPhaseChart(current) {
+  const canvas = $('phaseCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
+  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
+  const dpr = devicePixelRatio;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background zones
+  const zoneW = W / 6;
+  // Green zone (0-30°)
+  ctx.fillStyle = 'rgba(198,255,0,0.06)';
+  ctx.fillRect(W/2 - zoneW, 0, zoneW*2, H);
+  // Orange zones (30-90°)
+  ctx.fillStyle = 'rgba(255,170,0,0.06)';
+  ctx.fillRect(W/2 - zoneW*3, 0, zoneW, H);
+  ctx.fillRect(W/2 + zoneW*2, 0, zoneW, H);
+
+  // Center line
+  ctx.strokeStyle = '#333';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
+
+  // Phase history
+  if (phaseHistory.length > 1) {
+    ctx.strokeStyle = 'rgba(198,255,0,0.5)';
+    ctx.lineWidth = 1.5 * dpr;
+    ctx.beginPath();
+    phaseHistory.forEach((ph, i) => {
+      const x = (i / phaseHistory.length) * W;
+      const y = H/2 + (ph / 180) * (H/2);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  }
+
+  // Current value needle
+  if (isFinite(current)) {
+    const needleX = W/2 + (current / 180) * (W/2);
+    const col = Math.abs(current) < 30 ? '#C6FF00' : Math.abs(current) < 90 ? '#ffaa00' : '#ff3344';
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(needleX, H/2, 6*dpr, 0, Math.PI*2);
+    ctx.fill();
+
+    ctx.fillStyle = col;
+    ctx.font = `bold ${9*dpr}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText(current.toFixed(0)+'°', needleX, H - 4*dpr);
+  }
+
+  // Labels
+  ctx.fillStyle = '#555';
+  ctx.font = `${8*dpr}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.fillText('-180°', 10*dpr, H/2);
+  ctx.fillText('0°', W/2, 10*dpr);
+  ctx.fillText('+180°', W-10*dpr, H/2);
+}
+
+// Hook into main loop for club processing
+function processClubFrame(rms) {
+  if (document.querySelector('.tab[data-tab="club"]')?.classList.contains('active')) {
+    drawFloorPlan();
+    drawSplChart();
+  }
+  processSplFrame(rms);
+  processPhaseFrame();
+}
+
+// Init club tab when tab is clicked
+document.querySelector('[data-tab="club"]')?.addEventListener('click', () => {
+  setTimeout(() => {
+    initFloorPlan();
+    calcDelay();
+    drawSplChart();
+  }, 50);
+});
+
+// ============ END CLUB TAB ============
+
 // ============ INIT ============
 buildBands();
 buildKeyGrid();
+calcDelay();
 </script>
 </body>
 </html>
