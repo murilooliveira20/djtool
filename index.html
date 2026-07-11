@@ -841,6 +841,29 @@
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
+  /* CLUB TAB */
+  .club-layout{flex:1;display:grid;grid-template-columns:1fr 340px;gap:6px;min-height:0;overflow:hidden;height:100%}
+  .club-main{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden}
+  .club-sidebar{display:flex;flex-direction:column;gap:6px;overflow-y:auto;min-height:0}
+  .club-panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:8px}
+  .club-panel-title{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .floorplan-container{flex:1;background:#0d0d0d;border:1px solid var(--border);border-radius:6px;position:relative;overflow:hidden;min-height:240px}
+  #floorCanvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
+  .fp-tool-btn{background:var(--panel-2);border:1px solid var(--border-2);color:var(--text-dim);padding:5px 9px;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:700;cursor:pointer;touch-action:manipulation;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.1s}
+  .fp-tool-btn:active{transform:scale(0.95)}
+  .fp-tool-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+  .spl-chart-wrap{height:100px;background:#0d0d0d;border-radius:4px;overflow:hidden;border:1px solid var(--border-2)}
+  #splCanvas{width:100%;height:100%;display:block}
+  .spl-value{font-family:var(--display);font-size:28px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;text-align:center;line-height:1}
+  .spl-sub{font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-top:2px}
+  .spl-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center}
+  .spl-stat-val{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
+  .spl-stat-lbl{color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;font-size:8px}
+  .phase-meter-val{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
+  .phase-meter-val.good{color:var(--accent)}
+  .phase-meter-val.warn{color:var(--orange)}
+  .phase-meter-val.bad{color:var(--red)}
+  @media(max-width:900px){.club-layout{grid-template-columns:1fr}.club-sidebar{max-height:50vh}}
 </style>
 </head>
 <body>
@@ -1069,210 +1092,6 @@
       </div>
     </div>
   </div>
-</div>
-
-<style>
-/* ============ CLUB TAB STYLES ============ */
-.club-layout {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 6px;
-  min-height: 0;
-  overflow: hidden;
-}
-.club-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  min-height: 0;
-  overflow: hidden;
-}
-.club-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  overflow-y: auto;
-  min-height: 0;
-}
-.club-panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-.club-panel-title {
-  font-family: var(--display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-dim);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* FLOOR PLAN */
-.floorplan-container {
-  flex: 1;
-  background: #0d0d0d;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  position: relative;
-  overflow: hidden;
-  min-height: 0;
-}
-#floorCanvas { width: 100%; height: 100%; display: block; cursor: crosshair; touch-action: none; }
-
-.fp-toolbar {
-  display: flex;
-  gap: 4px;
-  flex-wrap: wrap;
-  align-items: center;
-}
-.fp-tool-btn {
-  background: var(--panel-2);
-  border: 1px solid var(--border-2);
-  color: var(--text-dim);
-  padding: 5px 9px;
-  border-radius: 3px;
-  font-family: var(--mono);
-  font-size: 9px;
-  font-weight: 700;
-  cursor: pointer;
-  touch-action: manipulation;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.1s;
-}
-.fp-tool-btn:active { transform: scale(0.95); }
-.fp-tool-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-.fp-tool-btn.danger { color: var(--red); border-color: var(--red); }
-
-.speaker-legend {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  font-size: 9px;
-  color: var(--text-dim);
-}
-.legend-item { display: flex; align-items: center; gap: 4px; }
-.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
-
-/* SPL LOGGER */
-.spl-chart-wrap {
-  position: relative;
-  height: 120px;
-  background: #0d0d0d;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--border-2);
-}
-#splCanvas { width: 100%; height: 100%; display: block; }
-.spl-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.spl-value {
-  font-family: var(--display);
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-  line-height: 1;
-}
-.spl-sub { font-size: 9px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 1px; text-align: center; margin-top: 2px; }
-.spl-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 4px;
-  font-size: 9px;
-  text-align: center;
-}
-.spl-stat-val { font-size: 13px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-.spl-stat-lbl { color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.5px; font-size: 8px; }
-
-/* DELAY CALC */
-.delay-inputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-.delay-field {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-.delay-field label { font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-.delay-field input {
-  background: var(--panel-2);
-  border: 1px solid var(--border-2);
-  color: var(--text);
-  padding: 8px;
-  border-radius: 3px;
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 700;
-  text-align: center;
-  width: 100%;
-}
-.delay-field input:focus { outline: none; border-color: var(--accent); }
-.delay-result {
-  background: var(--panel-2);
-  border: 1px solid var(--border-2);
-  border-radius: 4px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px;
-}
-.delay-result-item { text-align: center; }
-.delay-result-val { font-size: 18px; font-weight: 800; color: var(--accent); font-variant-numeric: tabular-nums; font-family: var(--display); }
-.delay-result-lbl { font-size: 8px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-.delay-presets { display: flex; gap: 4px; flex-wrap: wrap; }
-.delay-preset-btn {
-  background: var(--panel-2);
-  border: 1px solid var(--border-2);
-  color: var(--text-dim);
-  padding: 4px 8px;
-  border-radius: 3px;
-  font-family: var(--mono);
-  font-size: 9px;
-  cursor: pointer;
-  touch-action: manipulation;
-}
-.delay-preset-btn:active { background: var(--accent); color: #000; }
-
-/* PHASE */
-.phase-chart-wrap {
-  height: 100px;
-  background: #0d0d0d;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 1px solid var(--border-2);
-}
-#phaseCanvas { width: 100%; height: 100%; display: block; }
-.phase-meters {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 4px;
-}
-.phase-meter-item { text-align: center; }
-.phase-meter-val { font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.phase-meter-val.good { color: var(--accent); }
-.phase-meter-val.warn { color: var(--orange); }
-.phase-meter-val.bad { color: var(--red); }
-.phase-meter-lbl { font-size: 8px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
-
-@media (max-width: 900px) {
-  .club-layout { grid-template-columns: 1fr; }
-  .club-sidebar { max-height: 55vh; }
-}
-</style>
 
   <!-- CLUB TAB -->
   <div class="tab-content" id="tab-club">
@@ -1282,23 +1101,23 @@
       <div class="club-main">
         <div class="club-panel" style="flex-shrink:0;">
           <div class="club-panel-title">
-            <span>⬡ Plano — Casa Colombo · Planta Baja</span>
+            <span>⬡ Plano · Casa Colombo · Planta Baja</span>
             <div style="display:flex;gap:4px;">
               <button class="fp-tool-btn active" id="fpToolMove" onclick="setFpTool('move')">✥ Mover</button>
               <button class="fp-tool-btn" id="fpToolAdd" onclick="setFpTool('add')">+ Agregar</button>
-              <button class="fp-tool-btn danger" id="fpToolDel" onclick="setFpTool('del')">✕ Borrar</button>
+              <button class="fp-tool-btn" id="fpToolDel" style="color:var(--red);border-color:var(--red);" onclick="setFpTool('del')">✕ Borrar</button>
               <button class="fp-tool-btn" onclick="resetSpeakers()">Reset</button>
             </div>
           </div>
-          <div class="fp-toolbar">
+          <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
             <span style="font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;">Tipo:</span>
             <button class="fp-tool-btn active" id="spTypeK12" onclick="setSpeakerType('K12.2')">QSC K12.2</button>
             <button class="fp-tool-btn" id="spTypeSub" onclick="setSpeakerType('SUB')">SUB DAS 18"</button>
             <button class="fp-tool-btn" id="spTypeMonitor" onclick="setSpeakerType('MON')">Monitor</button>
-            <div class="speaker-legend" style="margin-left:8px;">
-              <div class="legend-item"><div class="legend-dot" style="background:#C6FF00"></div>K12.2</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#ff3060"></div>SUB</div>
-              <div class="legend-item"><div class="legend-dot" style="background:#30aaff"></div>MON</div>
+            <div style="display:flex;gap:8px;margin-left:6px;font-size:9px;color:var(--text-dim);">
+              <span><span style="color:#C6FF00">●</span> K12.2</span>
+              <span><span style="color:#ff3060">●</span> SUB</span>
+              <span><span style="color:#30aaff">●</span> MON</span>
             </div>
           </div>
         </div>
@@ -1316,7 +1135,7 @@
             <span>◉ SPL Logger</span>
             <div style="display:flex;gap:4px;">
               <button class="fp-tool-btn" id="splStartBtn" onclick="toggleSplLog()">▶ Iniciar</button>
-              <button class="fp-tool-btn danger" onclick="clearSplLog()">✕</button>
+              <button class="fp-tool-btn" style="color:var(--red)" onclick="clearSplLog()">✕</button>
             </div>
           </div>
           <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center;">
@@ -1325,31 +1144,20 @@
               <div class="spl-sub">dB SPL</div>
             </div>
             <div class="spl-stats">
-              <div>
-                <div class="spl-stat-val" id="splMax">—</div>
-                <div class="spl-stat-lbl">Peak</div>
-              </div>
-              <div>
-                <div class="spl-stat-val" id="splAvg">—</div>
-                <div class="spl-stat-lbl">Avg</div>
-              </div>
-              <div>
-                <div class="spl-stat-val" id="splMin">—</div>
-                <div class="spl-stat-lbl">Min</div>
-              </div>
+              <div><div class="spl-stat-val" id="splMax">—</div><div class="spl-stat-lbl">Peak</div></div>
+              <div><div class="spl-stat-val" id="splAvg">—</div><div class="spl-stat-lbl">Avg</div></div>
+              <div><div class="spl-stat-val" id="splMin">—</div><div class="spl-stat-lbl">Min</div></div>
             </div>
           </div>
-          <div class="spl-chart-wrap">
-            <canvas id="splCanvas"></canvas>
-          </div>
-          <div class="spl-controls">
+          <div class="spl-chart-wrap"><canvas id="splCanvas"></canvas></div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
             <div class="control-group">
               <span class="control-label">Ref</span>
               <input type="range" id="splRefSlider" min="60" max="120" value="94" step="1" style="width:60px;" oninput="splRefDb=parseInt(this.value);document.getElementById('splRefVal').textContent=this.value+'dB'">
               <span class="slider-value" id="splRefVal">94dB</span>
             </div>
             <div class="control-group">
-              <span class="control-label">Window</span>
+              <span class="control-label">Win</span>
               <input type="range" id="splWinSlider" min="5" max="60" value="20" step="5" style="width:50px;" oninput="document.getElementById('splWinVal').textContent=this.value+'min'">
               <span class="slider-value" id="splWinVal">20min</span>
             </div>
@@ -1361,42 +1169,30 @@
         <!-- DELAY CALCULATOR -->
         <div class="club-panel">
           <div class="club-panel-title">⟳ Delay por Distancia</div>
-          <div class="delay-inputs">
-            <div class="delay-field">
-              <label>Distancia (m)</label>
-              <input type="number" id="delayDist" value="10" min="0.1" max="100" step="0.1" oninput="calcDelay()">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <label style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Distancia (m)</label>
+              <input type="number" id="delayDist" value="10" min="0.1" max="100" step="0.1" oninput="calcDelay()" style="background:var(--panel-2);border:1px solid var(--border-2);color:var(--text);padding:8px;border-radius:3px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;width:100%;">
             </div>
-            <div class="delay-field">
-              <label>Temp. °C</label>
-              <input type="number" id="delayTemp" value="22" min="-10" max="45" step="1" oninput="calcDelay()">
-            </div>
-          </div>
-          <div class="delay-result">
-            <div class="delay-result-item">
-              <div class="delay-result-val" id="delayMs">—</div>
-              <div class="delay-result-lbl">Delay (ms)</div>
-            </div>
-            <div class="delay-result-item">
-              <div class="delay-result-val" id="delaySamples">—</div>
-              <div class="delay-result-lbl">Samples @48k</div>
-            </div>
-            <div class="delay-result-item">
-              <div class="delay-result-val" id="delaySpeedSound">—</div>
-              <div class="delay-result-lbl">v sonido (m/s)</div>
-            </div>
-            <div class="delay-result-item">
-              <div class="delay-result-val" id="delayFrames">—</div>
-              <div class="delay-result-lbl">Frames @44.1k</div>
+            <div style="display:flex;flex-direction:column;gap:3px;">
+              <label style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Temp. °C</label>
+              <input type="number" id="delayTemp" value="22" min="-10" max="45" step="1" oninput="calcDelay()" style="background:var(--panel-2);border:1px solid var(--border-2);color:var(--text);padding:8px;border-radius:3px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;width:100%;">
             </div>
           </div>
-          <div style="font-size:9px;color:var(--text-mute);margin-top:2px;">Distancias del sistema:</div>
-          <div class="delay-presets">
-            <button class="delay-preset-btn" onclick="setDelayDist(3)">3m</button>
-            <button class="delay-preset-btn" onclick="setDelayDist(5)">5m</button>
-            <button class="delay-preset-btn" onclick="setDelayDist(8)">8m</button>
-            <button class="delay-preset-btn" onclick="setDelayDist(10)">10m</button>
-            <button class="delay-preset-btn" onclick="setDelayDist(15)">15m</button>
-            <button class="delay-preset-btn" onclick="setDelayDist(20)">20m</button>
+          <div style="background:var(--panel-2);border:1px solid var(--border-2);border-radius:4px;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+            <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;font-family:var(--display);" id="delayMs">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Delay (ms)</div></div>
+            <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;font-family:var(--display);" id="delaySamples">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Samples @48k</div></div>
+            <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:var(--text);" id="delaySpeedSound">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">m/s sonido</div></div>
+            <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:var(--text);" id="delayFrames">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Samples @44.1k</div></div>
+          </div>
+          <div style="font-size:9px;color:var(--text-mute);margin-top:2px;">Presets:</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            <button class="fp-tool-btn" onclick="setDelayDist(3)">3m</button>
+            <button class="fp-tool-btn" onclick="setDelayDist(5)">5m</button>
+            <button class="fp-tool-btn" onclick="setDelayDist(8)">8m</button>
+            <button class="fp-tool-btn" onclick="setDelayDist(10)">10m</button>
+            <button class="fp-tool-btn" onclick="setDelayDist(15)">15m</button>
+            <button class="fp-tool-btn" onclick="setDelayDist(20)">20m</button>
           </div>
         </div>
 
@@ -1406,38 +1202,25 @@
             <span>⟲ Coherencia de Fase</span>
             <button class="fp-tool-btn" id="phaseStartBtn" onclick="togglePhase()">▶ Medir</button>
           </div>
-          <div class="phase-meters">
-            <div class="phase-meter-item">
-              <div class="phase-meter-val good" id="phaseLow">—°</div>
-              <div class="phase-meter-lbl">Low &lt;300Hz</div>
-            </div>
-            <div class="phase-meter-item">
-              <div class="phase-meter-val" id="phaseMid">—°</div>
-              <div class="phase-meter-lbl">Mid 300-4k</div>
-            </div>
-            <div class="phase-meter-item">
-              <div class="phase-meter-val" id="phaseHigh">—°</div>
-              <div class="phase-meter-lbl">High &gt;4k</div>
-            </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">
+            <div style="text-align:center;"><div class="phase-meter-val good" id="phaseLow">—°</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Low &lt;300Hz</div></div>
+            <div style="text-align:center;"><div class="phase-meter-val" id="phaseMid">—°</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Mid 300-4k</div></div>
+            <div style="text-align:center;"><div class="phase-meter-val" id="phaseHigh">—°</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">High &gt;4k</div></div>
           </div>
-          <div class="phase-chart-wrap">
-            <canvas id="phaseCanvas"></canvas>
-          </div>
-          <div style="font-size:9px;color:var(--text-mute);line-height:1.6;">
+          <div style="height:80px;background:#0d0d0d;border-radius:4px;overflow:hidden;border:1px solid var(--border-2);"><canvas id="phaseCanvas"></canvas></div>
+          <div style="font-size:9px;color:var(--text-mute);line-height:1.8;">
             <span style="color:var(--accent)">■</span> 0±30° coherente &nbsp;
             <span style="color:var(--orange)">■</span> ±30-90° parcial &nbsp;
             <span style="color:var(--red)">■</span> ±90-180° inversión
           </div>
-          <div id="phaseWarning" style="font-size:10px;color:var(--red);display:none;font-weight:700;">
-            ⚠ Posible inversión de fase detectada
-          </div>
+          <div id="phaseWarning" style="font-size:10px;color:var(--red);display:none;font-weight:700;">⚠ Posible inversión de fase detectada</div>
         </div>
 
       </div>
     </div>
   </div>
-</div>
 
+</div>
 <script>
 'use strict';
 
@@ -3255,9 +3038,14 @@ function drawPhaseChart(current) {
 
 // Hook into main loop for club processing
 function processClubFrame(rms) {
-  if (document.querySelector('.tab[data-tab="club"]')?.classList.contains('active')) {
-    drawFloorPlan();
-    drawSplChart();
+  const clubActive = document.querySelector('.tab[data-tab="club"]')?.classList.contains('active');
+  if (clubActive) {
+    const now = performance.now();
+    // Redraw SPL chart every 500ms when active
+    if (now - splLastDraw > 500) {
+      drawSplChart();
+      splLastDraw = now;
+    }
   }
   processSplFrame(rms);
   processPhaseFrame();
@@ -3265,11 +3053,10 @@ function processClubFrame(rms) {
 
 // Init club tab when tab is clicked
 document.querySelector('[data-tab="club"]')?.addEventListener('click', () => {
-  setTimeout(() => {
-    initFloorPlan();
-    calcDelay();
-    drawSplChart();
-  }, 50);
+  // Multiple timeouts to handle canvas resize race condition
+  setTimeout(() => { initFloorPlan(); calcDelay(); drawSplChart(); }, 50);
+  setTimeout(() => { drawFloorPlan(); drawSplChart(); }, 200);
+  setTimeout(() => { drawFloorPlan(); }, 500);
 });
 
 // ============ END CLUB TAB ============
