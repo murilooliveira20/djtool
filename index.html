@@ -4,914 +4,276 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0a0a0a">
-<title>DJ TOOL</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Unbounded:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>mientras · DJ Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0a;
-    --panel: #111;
-    --panel-2: #161616;
-    --border: #222;
-    --border-2: #2a2a2a;
-    --text: #e8e8e8;
-    --text-dim: #888;
-    --text-mute: #555;
-    --accent: #C6FF00;
-    --accent-dim: #8aaf00;
-    --red: #ff3344;
-    --orange: #ff9030;
-    --blue: #30aaff;
-    --purple: #b060ff;
-    --mono: 'JetBrains Mono', 'SF Mono', Monaco, monospace;
-    --display: 'Unbounded', sans-serif;
-  }
-  
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  
-  html, body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    overflow: hidden;
-    height: 100vh;
-    height: 100dvh;
-    user-select: none;
-    -webkit-user-select: none;
-    overscroll-behavior: none;
-  }
-  
-  #app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    height: 100dvh;
-    padding: 6px;
-    gap: 6px;
-  }
-  
-  /* ============ HEADER ============ */
-  .header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 12px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .brand-mark {
-    width: 18px;
-    height: 18px;
-    background: var(--accent);
-    border-radius: 2px;
-    position: relative;
-  }
-  .brand-mark::after {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    background: var(--bg);
-    border-radius: 1px;
-  }
-  .brand h1 {
-    font-family: var(--display);
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    color: var(--text);
-  }
-  .brand h1 span { color: var(--accent); }
-  .header-info {
-    display: flex;
-    gap: 14px;
-    align-items: center;
-    font-size: 10px;
-    color: var(--text-dim);
-  }
-  .info-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .status-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #333;
-    transition: background 0.2s;
-  }
-  .status-dot.active {
-    background: var(--accent);
-    box-shadow: 0 0 6px var(--accent);
-  }
-  
-  /* ============ TABS ============ */
-  .tabs {
-    display: flex;
-    gap: 4px;
-    padding: 4px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-  }
-  .tab {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    padding: 8px 4px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.15s;
-    touch-action: manipulation;
-  }
-  .tab:active { transform: scale(0.97); }
-  .tab.active {
-    background: var(--accent);
-    color: #000;
-  }
-  
-  /* ============ TAB CONTENT ============ */
-  .tab-content {
-    flex: 1;
-    display: none;
-    flex-direction: column;
-    gap: 6px;
-    min-height: 0;
-    overflow: hidden;
-  }
-  .tab-content.active { display: flex; }
-  
-  /* ============ ANALYZER TAB ============ */
-  .top-row {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 4px;
-  }
-  .metric-card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 6px 8px;
-    text-align: center;
-  }
-  .metric-label {
-    font-size: 8px;
-    color: var(--text-mute);
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 3px;
-  }
-  .metric-value {
-    font-size: 18px;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    color: var(--text);
-    line-height: 1;
-  }
-  .metric-value.over { color: var(--red); }
-  .metric-value.warn { color: var(--orange); }
-  .metric-target {
-    font-size: 9px;
-    color: var(--text-mute);
-    margin-top: 3px;
-    font-variant-numeric: tabular-nums;
-  }
-  
-  #spectrum-container {
-    flex: 1;
-    background: #0d0d0d;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    position: relative;
-    overflow: hidden;
-    min-height: 0;
-  }
-  #spectrum { width: 100%; height: 100%; display: block; }
-  
-  .bands-row {
-    display: grid;
-    gap: 4px;
-  }
-  .bands-row.three { grid-template-columns: 1fr 1fr 1fr; }
-  .bands-row.four { grid-template-columns: 1fr 1fr 1fr 1fr; }
-  
-  .band {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 6px;
-  }
-  .band-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9px;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .band-name { font-weight: 700; }
-  .band-freq { color: var(--text-mute); }
-  .band-meter {
-    height: 16px;
-    background: var(--panel-2);
-    border-radius: 2px;
-    position: relative;
-    overflow: hidden;
-  }
-  .band-fill {
-    height: 100%;
-    width: 0%;
-    transition: width 0.05s linear;
-    border-radius: 2px;
-  }
-  .band-target-line {
-    position: absolute;
-    top: -2px;
-    bottom: -2px;
-    width: 2px;
-    background: #fff;
-    box-shadow: 0 0 4px #fff;
-    transition: left 0.2s ease;
-    display: none;
-  }
-  .band-target-line.active { display: block; }
-  .band-values {
-    display: flex;
-    justify-content: space-between;
-    font-size: 9px;
-    margin-top: 3px;
-    color: var(--text-dim);
-    font-variant-numeric: tabular-nums;
-  }
-  .band-current { color: var(--text); font-weight: 700; }
-  .band-delta.over { color: #ff6060; }
-  .band-delta.under { color: #60aaff; }
-  .band-delta.match { color: var(--accent); }
-  
-  .stereo-meter {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 2px 0;
-  }
-  .stereo-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 8px;
-  }
-  .stereo-label { width: 8px; color: var(--text-dim); font-weight: 700; }
-  .stereo-bar {
-    flex: 1;
-    height: 5px;
-    background: var(--panel-2);
-    border-radius: 1px;
-    overflow: hidden;
-  }
-  .stereo-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #60ff60 0%, #ffaa00 70%, #ff3030 90%);
-    width: 0%;
-    transition: width 0.05s linear;
-  }
-  
-  /* ============ CONTROLS ============ */
-  .controls {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-    align-items: center;
-    padding: 6px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-  }
-  .btn {
-    background: var(--panel-2);
-    border: 1px solid var(--border-2);
-    color: var(--text);
-    padding: 7px 10px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: all 0.12s;
-    touch-action: manipulation;
-  }
-  .btn:active { transform: scale(0.95); }
-  .btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
-  .btn.danger { border-color: var(--red); color: #ff7080; }
-  .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-  
-  .control-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: var(--panel-2);
-    padding: 4px 8px;
-    border-radius: 4px;
-    border: 1px solid var(--border-2);
-  }
-  .control-label {
-    font-size: 8px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  input[type="range"] {
-    width: 70px;
-    height: 4px;
-    background: var(--border-2);
-    border-radius: 2px;
-    outline: none;
-    -webkit-appearance: none;
-  }
-  input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
-    background: var(--accent);
-    border-radius: 50%;
-    cursor: pointer;
-  }
-  input[type="range"]::-moz-range-thumb {
-    width: 14px;
-    height: 14px;
-    background: var(--accent);
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-  }
-  .slider-value {
-    font-size: 10px;
-    color: var(--accent);
-    min-width: 32px;
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-  }
-  
-  /* ============ BPM TAB ============ */
-  .bpm-layout {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    min-height: 0;
-  }
-  .bpm-panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .panel-title {
-    font-family: var(--display);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-  
-  .bpm-display {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
-  .bpm-big {
-    font-family: var(--display);
-    font-size: clamp(48px, 14vw, 96px);
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 0.9;
-    font-variant-numeric: tabular-nums;
-    text-shadow: 0 0 30px rgba(198, 255, 0, 0.3);
-  }
-  .bpm-unit {
-    font-size: 11px;
-    color: var(--text-mute);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-  }
-  .bpm-confidence {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 9px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .bpm-confidence-bar {
-    width: 60px;
-    height: 4px;
-    background: var(--panel-2);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .bpm-confidence-fill {
-    height: 100%;
-    background: var(--accent);
-    width: 0%;
-    transition: width 0.3s ease;
-  }
-  
-  .bpm-alternatives {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-    font-size: 10px;
-    color: var(--text-dim);
-    font-variant-numeric: tabular-nums;
-  }
-  .bpm-alt {
-    padding: 4px 8px;
-    background: var(--panel-2);
-    border: 1px solid var(--border-2);
-    border-radius: 3px;
-  }
-  .bpm-alt span { color: var(--text); font-weight: 600; }
-  
-  .tap-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-  }
-  .tap-pad {
-    width: 100%;
-    max-width: 220px;
-    aspect-ratio: 1;
-    background: var(--panel-2);
-    border: 2px solid var(--border-2);
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.08s;
-    position: relative;
-    touch-action: manipulation;
-  }
-  .tap-pad:active, .tap-pad.tapped {
-    background: var(--accent);
-    border-color: var(--accent);
-    transform: scale(0.96);
-    box-shadow: 0 0 40px rgba(198, 255, 0, 0.5);
-  }
-  .tap-pad:active .tap-label, .tap-pad.tapped .tap-label {
-    color: #000;
-  }
-  .tap-label {
-    font-family: var(--display);
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: 3px;
-    color: var(--text);
-    transition: color 0.08s;
-  }
-  .tap-info {
-    display: flex;
-    gap: 16px;
-    font-size: 10px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .tap-info span { color: var(--accent); font-weight: 700; }
-  
-  .bpm-controls {
-    display: flex;
-    gap: 6px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .bpm-utils {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    font-size: 10px;
-  }
-  .util-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-  }
-  .util-label { color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; font-size: 9px; }
-  .util-value { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
-  
-  /* ============ HARMONIC TAB ============ */
-  .harmonic-layout {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 320px 1fr;
-    gap: 6px;
-    min-height: 0;
-  }
-  .harmonic-controls-panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-  }
-  .harmonic-display-panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 14px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  
-  .key-selector {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .key-selector-row {
-    display: flex;
-    gap: 6px;
-  }
-  .key-input {
-    flex: 1;
-    background: var(--panel-2);
-    border: 1px solid var(--border-2);
-    color: var(--text);
-    padding: 12px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-size: 14px;
-    font-weight: 700;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .key-input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  
-  .notation-toggle {
-    display: flex;
-    gap: 2px;
-    background: var(--panel-2);
-    padding: 3px;
-    border-radius: 4px;
-    border: 1px solid var(--border-2);
-  }
-  .notation-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
-    padding: 6px;
-    border-radius: 3px;
-    font-family: var(--mono);
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-  }
-  .notation-btn.active {
-    background: var(--accent);
-    color: #000;
-  }
-  
-  .key-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-  }
-  .key-cell {
-    background: var(--panel-2);
-    border: 1px solid var(--border-2);
-    color: var(--text);
-    padding: 8px 4px;
-    border-radius: 3px;
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 700;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.1s;
-    touch-action: manipulation;
-  }
-  .key-cell.minor { color: var(--blue); }
-  .key-cell.major { color: var(--orange); }
-  .key-cell:active { transform: scale(0.95); }
-  .key-cell.selected {
-    background: var(--accent);
-    color: #000 !important;
-    border-color: var(--accent);
-  }
-  
-  .compatibility-display {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    overflow-y: auto;
-  }
-  
-  .current-key-display {
-    text-align: center;
-    padding: 16px;
-    background: linear-gradient(135deg, rgba(198,255,0,0.08), rgba(198,255,0,0.02));
-    border: 1px solid rgba(198,255,0,0.2);
-    border-radius: 6px;
-  }
-  .current-key-camelot {
-    font-family: var(--display);
-    font-size: 42px;
-    font-weight: 800;
-    color: var(--accent);
-    line-height: 1;
-  }
-  .current-key-musical {
-    font-size: 14px;
-    color: var(--text);
-    margin-top: 4px;
-    font-weight: 600;
-    letter-spacing: 1px;
-  }
-  .current-key-label {
-    font-size: 9px;
-    color: var(--text-mute);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin-top: 6px;
-  }
-  
-  .compat-section {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .compat-section-title {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-dim);
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .compat-section-title::before {
-    content: '';
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-  }
-  .compat-section-title.warm::before { background: var(--orange); }
-  .compat-section-title.bold::before { background: var(--purple); }
-  .compat-section-title.risk::before { background: var(--red); }
-  
-  .compat-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 4px;
-  }
-  .compat-item {
-    background: var(--panel-2);
-    border: 1px solid var(--border-2);
-    padding: 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: all 0.12s;
-    touch-action: manipulation;
-  }
-  .compat-item:active { transform: scale(0.97); }
-  .compat-item:hover { border-color: var(--accent); }
-  .compat-item-camelot {
-    font-family: var(--display);
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--accent);
-  }
-  .compat-item-musical {
-    font-size: 10px;
-    color: var(--text);
-    margin-top: 2px;
-    font-weight: 600;
-  }
-  .compat-item-desc {
-    font-size: 8px;
-    color: var(--text-mute);
-    margin-top: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  
-  /* ============ START OVERLAY ============ */
-  .start-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 24px;
-    text-align: center;
-  }
-  .start-logo {
-    font-family: var(--display);
-    font-size: 32px;
-    font-weight: 800;
-    letter-spacing: 4px;
-    color: var(--text);
-    margin-bottom: 6px;
-  }
-  .start-logo span { color: var(--accent); }
-  .start-sub {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 36px;
-  }
-  .start-features {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 36px;
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-  .start-feature {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-  }
-  .start-feature-icon {
-    font-size: 14px;
-    color: var(--accent);
-    font-family: var(--display);
-    font-weight: 800;
-  }
-  .start-msg {
-    color: var(--text-dim);
-    font-size: 11px;
-    line-height: 1.6;
-    max-width: 340px;
-    margin-bottom: 28px;
-  }
-  .start-btn {
-    background: var(--accent);
-    color: #000;
-    border: none;
-    padding: 16px 40px;
-    border-radius: 4px;
-    font-family: var(--mono);
-    font-weight: 800;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    cursor: pointer;
-  }
-  .start-btn-secondary {
-    background: transparent;
-    color: var(--text-dim);
-    border: 1px solid var(--border-2);
-    margin-top: 10px;
-  }
-  
-  /* ============ RESPONSIVE ============ */
-  @media (max-width: 720px) {
-    .top-row { grid-template-columns: repeat(3, 1fr); }
-    .top-row .metric-card:nth-child(4),
-    .top-row .metric-card:nth-child(5) { grid-column: span 1; }
-    .metric-value { font-size: 14px; }
-    .bpm-layout { grid-template-columns: 1fr; }
-    .harmonic-layout { grid-template-columns: 1fr; }
-    .harmonic-controls-panel { max-height: 45%; }
-    .controls { gap: 3px; }
-    .btn { padding: 6px 8px; font-size: 8px; }
-    input[type="range"] { width: 60px; }
-    .control-group { padding: 3px 6px; }
-    .start-features { gap: 16px; }
-  }
-  
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 2px; }
-  /* CLUB TAB */
-  .club-layout{flex:1;display:grid;grid-template-columns:1fr 340px;gap:6px;min-height:0;overflow:hidden;height:100%}
-  .club-main{display:flex;flex-direction:column;gap:6px;min-height:0;overflow:hidden}
-  .club-sidebar{display:flex;flex-direction:column;gap:6px;overflow-y:auto;min-height:0}
-  .club-panel{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:12px;display:flex;flex-direction:column;gap:8px}
-  .club-panel-title{font-family:var(--display);font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim);padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-  .floorplan-container{flex:1;background:#0d0d0d;border:1px solid var(--border);border-radius:6px;position:relative;overflow:hidden;min-height:240px}
-  #floorCanvas{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair}
-  .fp-tool-btn{background:var(--panel-2);border:1px solid var(--border-2);color:var(--text-dim);padding:5px 9px;border-radius:3px;font-family:var(--mono);font-size:9px;font-weight:700;cursor:pointer;touch-action:manipulation;text-transform:uppercase;letter-spacing:0.5px;transition:all 0.1s}
-  .fp-tool-btn:active{transform:scale(0.95)}
-  .fp-tool-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
-  .spl-chart-wrap{height:100px;background:#0d0d0d;border-radius:4px;overflow:hidden;border:1px solid var(--border-2)}
-  #splCanvas{width:100%;height:100%;display:block}
-  .spl-value{font-family:var(--display);font-size:28px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;text-align:center;line-height:1}
-  .spl-sub{font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:1px;text-align:center;margin-top:2px}
-  .spl-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center}
-  .spl-stat-val{font-size:13px;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
-  .spl-stat-lbl{color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;font-size:8px}
-  .phase-meter-val{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums}
-  .phase-meter-val.good{color:var(--accent)}
-  .phase-meter-val.warn{color:var(--orange)}
-  .phase-meter-val.bad{color:var(--red)}
-  @media(max-width:900px){.club-layout{grid-template-columns:1fr}.club-sidebar{max-height:50vh}}
+:root {
+  --bg: #0a0a0a; --panel: #111; --panel2: #161616; --border: #222; --border2: #2a2a2a;
+  --text: #e8e8e8; --dim: #888; --mute: #444;
+  --acc: #C6FF00; --red: #ff3344; --orange: #ff9030; --blue: #30aaff; --purple: #b060ff;
+  --mono: 'JetBrains Mono', monospace; --disp: 'Unbounded', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body { background:var(--bg); color:var(--text); font-family:var(--mono); overflow:hidden; height:100vh; height:100dvh; user-select:none; }
+#app { display:flex; flex-direction:column; height:100dvh; padding:6px; gap:6px; }
+
+/* HEADER */
+.hdr { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; background:var(--panel); border:1px solid var(--border); border-radius:6px; flex-shrink:0; }
+.brand { display:flex; align-items:center; gap:8px; }
+.brand-sq { width:16px; height:16px; background:var(--acc); border-radius:2px; position:relative; }
+.brand-sq::after { content:''; position:absolute; inset:4px; background:var(--bg); border-radius:1px; }
+.brand h1 { font-family:var(--disp); font-size:12px; font-weight:800; letter-spacing:2px; }
+.brand h1 span { color:var(--acc); }
+.hdr-right { display:flex; gap:8px; align-items:center; font-size:10px; color:var(--dim); }
+.dot { width:6px; height:6px; border-radius:50%; background:#333; transition:background .2s; }
+.dot.on { background:var(--acc); box-shadow:0 0 6px var(--acc); }
+select.dev-sel { background:var(--panel2); border:1px solid var(--border2); color:var(--acc); font-family:var(--mono); font-size:9px; padding:3px 6px; border-radius:3px; max-width:140px; }
+
+/* TABS */
+.tabs { display:flex; gap:3px; padding:3px; background:var(--panel); border:1px solid var(--border); border-radius:6px; overflow-x:auto; flex-shrink:0; scrollbar-width:none; }
+.tabs::-webkit-scrollbar { display:none; }
+.tab { flex-shrink:0; background:transparent; border:none; color:var(--dim); padding:7px 10px; border-radius:4px; font-family:var(--mono); font-size:10px; font-weight:700; letter-spacing:.5px; text-transform:uppercase; cursor:pointer; white-space:nowrap; touch-action:manipulation; transition:all .12s; }
+.tab.active { background:var(--acc); color:#000; }
+
+/* TAB CONTENT */
+.tc { flex:1; display:none; flex-direction:column; gap:6px; min-height:0; overflow:hidden; }
+.tc.active { display:flex; }
+
+/* COMMON COMPONENTS */
+.btn { background:var(--panel2); border:1px solid var(--border2); color:var(--text); padding:7px 11px; border-radius:4px; font-family:var(--mono); font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; cursor:pointer; touch-action:manipulation; transition:all .12s; }
+.btn:active { transform:scale(.95); }
+.btn.acc { background:var(--acc); color:#000; border-color:var(--acc); }
+.btn.red { border-color:var(--red); color:#ff7080; }
+.btn.on { background:var(--acc); color:#000; border-color:var(--acc); }
+.panel { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:10px; }
+.ptitle { font-family:var(--disp); font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--dim); padding-bottom:8px; border-bottom:1px solid var(--border); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+.row { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.cg { display:flex; align-items:center; gap:5px; background:var(--panel2); padding:3px 8px; border-radius:4px; border:1px solid var(--border2); font-size:9px; }
+.cg label { color:var(--dim); text-transform:uppercase; letter-spacing:.5px; }
+input[type=range] { width:65px; height:4px; background:var(--border2); border-radius:2px; outline:none; -webkit-appearance:none; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; background:var(--acc); border-radius:50%; }
+.sv { font-size:10px; color:var(--acc); min-width:30px; font-weight:700; font-variant-numeric:tabular-nums; }
+canvas { display:block; }
+
+/* ===================== ANALYZER ===================== */
+.az-metrics { display:grid; grid-template-columns:repeat(5,1fr); gap:4px; flex-shrink:0; }
+.az-card { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:6px 8px; text-align:center; }
+.az-lbl { font-size:8px; color:var(--mute); text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; }
+.az-val { font-size:17px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+.az-val.over { color:var(--red); } .az-val.warn { color:var(--orange); }
+.az-tgt { font-size:9px; color:var(--mute); margin-top:2px; font-variant-numeric:tabular-nums; }
+.az-spec { flex:1; background:#0c0c0c; border:1px solid var(--border); border-radius:4px; position:relative; overflow:hidden; min-height:0; }
+#specCanvas { width:100%; height:100%; }
+.az-bands { display:grid; gap:4px; flex-shrink:0; }
+.az-bands.b3 { grid-template-columns:1fr 1fr 1fr; }
+.az-bands.b4 { grid-template-columns:1fr 1fr 1fr 1fr; }
+.band { background:var(--panel); border:1px solid var(--border); border-radius:4px; padding:6px; }
+.band-hdr { display:flex; justify-content:space-between; font-size:9px; margin-bottom:4px; text-transform:uppercase; }
+.band-bar { height:14px; background:var(--panel2); border-radius:2px; position:relative; overflow:hidden; }
+.band-fill { height:100%; width:0; border-radius:2px; transition:width .05s; }
+.band-tgt { position:absolute; top:-2px; bottom:-2px; width:2px; background:#fff; box-shadow:0 0 4px #fff; display:none; }
+.band-tgt.on { display:block; }
+.band-vals { display:flex; justify-content:space-between; font-size:9px; margin-top:3px; font-variant-numeric:tabular-nums; }
+.bd-cur { color:var(--text); font-weight:700; }
+.bd-delta.over { color:#ff6060; } .bd-delta.under { color:var(--blue); } .bd-delta.match { color:var(--acc); }
+.stereo-wrap { display:flex; flex-direction:column; gap:2px; padding:2px 0; }
+.stereo-r { display:flex; align-items:center; gap:4px; font-size:8px; }
+.stereo-r span { width:8px; color:var(--dim); font-weight:700; }
+.stereo-bar { flex:1; height:5px; background:var(--panel2); border-radius:1px; overflow:hidden; }
+.stereo-fill { height:100%; background:linear-gradient(90deg,#60ff60 0%,#ffaa00 70%,#ff3030 90%); width:0; transition:width .05s; }
+.az-ctrls { display:flex; gap:4px; flex-wrap:wrap; align-items:center; padding:6px; background:var(--panel); border:1px solid var(--border); border-radius:4px; flex-shrink:0; }
+
+/* ===================== BPM ===================== */
+.bpm-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; flex:1; min-height:0; }
+.bpm-panel { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:14px; display:flex; flex-direction:column; overflow:hidden; }
+.bpm-big { font-family:var(--disp); font-size:clamp(56px,14vw,100px); font-weight:800; color:var(--acc); line-height:.9; font-variant-numeric:tabular-nums; text-shadow:0 0 30px rgba(198,255,0,.3); text-align:center; }
+.bpm-unit { font-size:10px; color:var(--mute); letter-spacing:3px; text-transform:uppercase; text-align:center; margin-top:6px; }
+.bpm-conf { display:flex; align-items:center; gap:6px; font-size:9px; color:var(--dim); text-transform:uppercase; justify-content:center; margin-top:8px; }
+.bpm-cbar { width:60px; height:4px; background:var(--panel2); border-radius:2px; overflow:hidden; }
+.bpm-cfill { height:100%; background:var(--acc); width:0; transition:width .3s; }
+.bpm-alts { display:flex; gap:6px; justify-content:center; margin-top:8px; font-size:10px; color:var(--dim); flex-wrap:wrap; }
+.bpm-alt { padding:3px 8px; background:var(--panel2); border:1px solid var(--border2); border-radius:3px; }
+.tap-pad { width:min(180px,70%); aspect-ratio:1; background:var(--panel2); border:2px solid var(--border2); border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .08s; touch-action:manipulation; margin:0 auto; }
+.tap-pad:active,.tap-pad.hit { background:var(--acc); border-color:var(--acc); transform:scale(.96); box-shadow:0 0 40px rgba(198,255,0,.5); }
+.tap-pad:active .tap-lbl,.tap-pad.hit .tap-lbl { color:#000; }
+.tap-lbl { font-family:var(--disp); font-size:22px; font-weight:800; letter-spacing:3px; }
+.bpm-utils { display:grid; grid-template-columns:1fr 1fr; gap:4px; font-size:9px; margin-top:10px; padding-top:10px; border-top:1px solid var(--border); }
+.util-r { display:flex; justify-content:space-between; padding:3px 0; }
+.util-l { color:var(--dim); text-transform:uppercase; font-size:8px; }
+.util-v { color:var(--text); font-weight:700; font-variant-numeric:tabular-nums; }
+
+/* ===================== HARMONIC ===================== */
+.harm-layout { display:grid; grid-template-columns:300px 1fr; gap:6px; flex:1; min-height:0; }
+.harm-left { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:12px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
+.harm-right { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:12px; overflow-y:auto; }
+.ntoggle { display:flex; gap:2px; background:var(--panel2); padding:3px; border-radius:4px; border:1px solid var(--border2); }
+.nbtn { flex:1; background:transparent; border:none; color:var(--dim); padding:6px; border-radius:3px; font-family:var(--mono); font-size:9px; font-weight:700; text-transform:uppercase; cursor:pointer; }
+.nbtn.active { background:var(--acc); color:#000; }
+.key-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:3px; }
+.key-cell { background:var(--panel2); border:1px solid var(--border2); color:var(--text); padding:7px 3px; border-radius:3px; font-family:var(--mono); font-size:10px; font-weight:700; cursor:pointer; text-align:center; touch-action:manipulation; }
+.key-cell.min { color:var(--blue); } .key-cell.maj { color:var(--orange); }
+.key-cell.sel { background:var(--acc); color:#000 !important; border-color:var(--acc); }
+.ck-display { text-align:center; padding:14px; background:rgba(198,255,0,.05); border:1px solid rgba(198,255,0,.15); border-radius:6px; }
+.ck-cam { font-family:var(--disp); font-size:40px; font-weight:800; color:var(--acc); line-height:1; }
+.ck-mus { font-size:13px; color:var(--text); margin-top:4px; font-weight:600; }
+.ck-lbl { font-size:8px; color:var(--mute); text-transform:uppercase; letter-spacing:2px; margin-top:4px; }
+.compat-sec { margin-bottom:12px; }
+.compat-stitle { font-size:9px; text-transform:uppercase; letter-spacing:1.5px; color:var(--dim); font-weight:700; display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.compat-stitle::before { content:''; width:5px; height:5px; border-radius:50%; background:var(--acc); }
+.compat-stitle.warm::before { background:var(--orange); }
+.compat-stitle.bold::before { background:var(--purple); }
+.compat-stitle.risk::before { background:var(--red); }
+.compat-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(100px,1fr)); gap:4px; }
+.compat-item { background:var(--panel2); border:1px solid var(--border2); padding:7px; border-radius:4px; cursor:pointer; touch-action:manipulation; }
+.compat-item:active { border-color:var(--acc); }
+.ci-cam { font-family:var(--disp); font-size:15px; font-weight:800; color:var(--acc); }
+.ci-mus { font-size:9px; color:var(--text); margin-top:2px; font-weight:600; }
+.ci-desc { font-size:8px; color:var(--mute); margin-top:2px; text-transform:uppercase; }
+
+/* ===================== TIMECODE ===================== */
+.tc-layout { flex:1; display:grid; grid-template-columns:1fr 1fr; gap:6px; min-height:0; }
+.tc-panel { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:16px; display:flex; flex-direction:column; }
+.clock-big { font-family:var(--disp); font-size:clamp(40px,10vw,80px); font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; letter-spacing:2px; text-align:center; line-height:1; }
+.clock-date { font-size:11px; color:var(--dim); text-align:center; text-transform:uppercase; letter-spacing:2px; margin-top:6px; }
+.timer-big { font-family:var(--disp); font-size:clamp(36px,9vw,72px); font-weight:800; color:var(--acc); font-variant-numeric:tabular-nums; text-align:center; line-height:1; }
+.timer-lbl { font-size:9px; color:var(--mute); text-transform:uppercase; letter-spacing:2px; text-align:center; margin-top:4px; }
+.set-big { font-family:var(--disp); font-size:clamp(30px,7vw,58px); font-weight:800; color:var(--orange); font-variant-numeric:tabular-nums; text-align:center; line-height:1; }
+.event-grid { display:grid; grid-template-columns:auto 1fr auto; gap:4px 8px; font-size:10px; margin-top:8px; }
+.event-time { color:var(--acc); font-weight:700; font-variant-numeric:tabular-nums; }
+.event-name { color:var(--text); }
+.event-left { color:var(--dim); font-variant-numeric:tabular-nums; font-size:9px; }
+.event-now { background:rgba(198,255,0,.08); border-left:2px solid var(--acc); padding-left:4px; }
+.tc-input { background:var(--panel2); border:1px solid var(--border2); color:var(--text); padding:6px 8px; border-radius:3px; font-family:var(--mono); font-size:12px; font-weight:700; text-align:center; width:80px; }
+.tc-input:focus { outline:none; border-color:var(--acc); }
+
+/* ===================== SPL ===================== */
+.spl-layout { flex:1; display:grid; grid-template-rows:auto 1fr auto; gap:6px; min-height:0; }
+.spl-top { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; flex-shrink:0; }
+.spl-big-card { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:14px; text-align:center; display:flex; flex-direction:column; justify-content:center; }
+.spl-num { font-family:var(--disp); font-size:clamp(36px,8vw,64px); font-weight:800; font-variant-numeric:tabular-nums; line-height:1; color:var(--acc); }
+.spl-num.warn { color:var(--orange); } .spl-num.danger { color:var(--red); }
+.spl-lbl { font-size:9px; color:var(--mute); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; }
+.spl-chart-wrap { background:#0c0c0c; border:1px solid var(--border); border-radius:6px; position:relative; overflow:hidden; min-height:0; }
+#splCanvas { width:100%; height:100%; }
+.spl-ctrls { display:flex; gap:6px; flex-wrap:wrap; align-items:center; padding:8px; background:var(--panel); border:1px solid var(--border); border-radius:6px; flex-shrink:0; }
+#splTimestamps { font-size:9px; color:var(--dim); line-height:1.8; max-height:40px; overflow-y:auto; flex:1; }
+
+/* ===================== CLUB ===================== */
+.club-layout { flex:1; display:grid; grid-template-columns:1fr 320px; gap:6px; min-height:0; overflow:hidden; }
+.club-main { display:flex; flex-direction:column; gap:6px; min-height:0; }
+.club-side { display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; }
+.fp-wrap { flex:1; background:#0c0c0c; border:1px solid var(--border); border-radius:6px; overflow:hidden; min-height:220px; position:relative; }
+#floorCanvas { width:100%; height:100%; touch-action:none; cursor:crosshair; }
+.fp-btn { background:var(--panel2); border:1px solid var(--border2); color:var(--dim); padding:5px 8px; border-radius:3px; font-family:var(--mono); font-size:9px; font-weight:700; cursor:pointer; text-transform:uppercase; touch-action:manipulation; }
+.fp-btn:active { transform:scale(.95); }
+.fp-btn.on { background:var(--acc); color:#000; border-color:var(--acc); }
+.delay-res { display:grid; grid-template-columns:1fr 1fr; gap:6px; background:var(--panel2); border:1px solid var(--border2); border-radius:4px; padding:8px; }
+.dr-item { text-align:center; }
+.dr-val { font-family:var(--disp); font-size:20px; font-weight:800; color:var(--acc); font-variant-numeric:tabular-nums; }
+.dr-lbl { font-size:8px; color:var(--mute); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+.phase-wrap { height:80px; background:#0c0c0c; border-radius:4px; border:1px solid var(--border2); overflow:hidden; }
+#phaseCanvas { width:100%; height:100%; }
+.ph-val { font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; }
+.ph-val.good { color:var(--acc); } .ph-val.warn { color:var(--orange); } .ph-val.bad { color:var(--red); }
+
+/* ===================== VENU360 ===================== */
+.venu-layout { flex:1; display:grid; grid-template-columns:200px 1fr; gap:6px; min-height:0; overflow:hidden; }
+.venu-nav { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:6px; overflow-y:auto; }
+.venu-main { display:flex; flex-direction:column; gap:6px; overflow-y:auto; min-height:0; }
+.venu-preset-btn { background:var(--panel2); border:1px solid var(--border2); color:var(--text); padding:8px 10px; border-radius:4px; font-family:var(--mono); font-size:10px; cursor:pointer; text-align:left; touch-action:manipulation; width:100%; }
+.venu-preset-btn.active { border-color:var(--acc); color:var(--acc); background:rgba(198,255,0,.06); }
+.venu-section { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:12px; }
+.venu-block-chain { display:flex; gap:4px; align-items:center; flex-wrap:wrap; margin-top:8px; overflow-x:auto; padding-bottom:4px; }
+.vblk { background:var(--panel2); border:1px solid var(--border2); border-radius:4px; padding:6px 8px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; cursor:pointer; white-space:nowrap; touch-action:manipulation; position:relative; }
+.vblk:hover { border-color:var(--acc); }
+.vblk.active { border-color:var(--acc); background:rgba(198,255,0,.08); color:var(--acc); }
+.vblk::after { content:'→'; position:absolute; right:-12px; color:var(--mute); font-size:10px; }
+.vblk:last-child::after { display:none; }
+.vblk-arrow { color:var(--mute); font-size:12px; padding:0 2px; }
+.venu-params { background:var(--panel2); border:1px solid var(--border2); border-radius:4px; padding:10px; margin-top:6px; display:grid; gap:8px; }
+.vp-row { display:grid; grid-template-columns:120px 1fr auto; gap:8px; align-items:center; font-size:10px; }
+.vp-lbl { color:var(--dim); text-transform:uppercase; font-size:9px; letter-spacing:.5px; }
+.vp-slider { width:100%; height:4px; background:var(--border2); border-radius:2px; outline:none; -webkit-appearance:none; }
+.vp-slider::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px; background:var(--acc); border-radius:50%; }
+.vp-val { color:var(--acc); font-weight:700; min-width:50px; text-align:right; font-variant-numeric:tabular-nums; font-size:10px; }
+.venu-io-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin-top:8px; }
+.venu-io-card { background:var(--panel2); border:1px solid var(--border2); border-radius:4px; padding:8px; text-align:center; }
+.venu-io-num { font-family:var(--disp); font-size:18px; font-weight:800; color:var(--acc); }
+.venu-io-lbl { font-size:8px; color:var(--mute); text-transform:uppercase; letter-spacing:.5px; margin-top:2px; }
+.venu-meter { height:6px; background:var(--panel); border-radius:2px; overflow:hidden; margin-top:4px; }
+.venu-meter-fill { height:100%; background:linear-gradient(90deg,var(--acc) 0%,var(--orange) 70%,var(--red) 90%); width:0; transition:width .05s; }
+.out-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:4px; margin-top:8px; }
+.out-card { background:var(--panel2); border:1px solid var(--border2); border-radius:4px; padding:6px; text-align:center; cursor:pointer; }
+.out-card.sel { border-color:var(--acc); background:rgba(198,255,0,.06); }
+.out-num { font-family:var(--disp); font-size:14px; font-weight:800; color:var(--acc); }
+.out-lbl { font-size:8px; color:var(--mute); text-transform:uppercase; margin-top:2px; }
+.xover-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+.xover-band { background:var(--panel2); border:1px solid var(--border2); border-radius:4px; padding:8px; }
+.xover-name { font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; color:var(--dim); margin-bottom:6px; }
+.peq-grid { display:grid; gap:6px; }
+.peq-band { display:grid; grid-template-columns:40px 1fr 1fr 1fr; gap:6px; align-items:center; font-size:9px; padding:4px 0; border-bottom:1px solid var(--border2); }
+.peq-band:last-child { border-bottom:none; }
+.peq-lbl { color:var(--dim); }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:3px; height:3px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+
+/* RESPONSIVE */
+@media(max-width:700px) {
+  .az-metrics { grid-template-columns:repeat(3,1fr); }
+  .bpm-grid { grid-template-columns:1fr; }
+  .harm-layout { grid-template-columns:1fr; }
+  .tc-layout { grid-template-columns:1fr; }
+  .club-layout { grid-template-columns:1fr; }
+  .venu-layout { grid-template-columns:1fr; }
+  .venu-nav { flex-direction:row; overflow-x:auto; }
+  .venu-preset-btn { min-width:120px; }
+}
+
+/* START OVERLAY */
+.overlay { position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:100; padding:24px; text-align:center; }
+.ov-logo { font-family:var(--disp); font-size:28px; font-weight:800; letter-spacing:4px; margin-bottom:4px; }
+.ov-sub { font-size:10px; color:var(--dim); letter-spacing:3px; text-transform:uppercase; margin-bottom:32px; }
+.ov-feats { display:flex; gap:20px; flex-wrap:wrap; justify-content:center; margin-bottom:32px; font-size:9px; color:var(--dim); text-transform:uppercase; letter-spacing:1px; }
+.ov-feat { display:flex; flex-direction:column; align-items:center; gap:4px; }
+.ov-icon { font-size:16px; color:var(--acc); font-family:var(--disp); font-weight:800; }
+.ov-start { background:var(--acc); color:#000; border:none; padding:14px 36px; border-radius:4px; font-family:var(--mono); font-weight:800; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; margin-bottom:8px; }
+.ov-noaudio { background:transparent; color:var(--dim); border:1px solid var(--border2); padding:10px 24px; border-radius:4px; font-family:var(--mono); font-size:9px; cursor:pointer; letter-spacing:1px; text-transform:uppercase; }
 </style>
 </head>
 <body>
 
-<div class="start-overlay" id="startOverlay">
-  <div class="start-logo">DJ <span>TOOL</span></div>
-  <div class="start-sub">Booth Companion · v1.0</div>
-  
-  <div class="start-features">
-    <div class="start-feature">
-      <div class="start-feature-icon">◉</div>
-      <div>Analyzer</div>
-    </div>
-    <div class="start-feature">
-      <div class="start-feature-icon">♪</div>
-      <div>BPM</div>
-    </div>
-    <div class="start-feature">
-      <div class="start-feature-icon">♯</div>
-      <div>Harmonic</div>
-    </div>
+<div class="overlay" id="overlay">
+  <div class="ov-logo">mientras <span style="color:var(--acc)">·</span></div>
+  <div class="ov-sub">DJ Tool · Booth Companion · v2.0</div>
+  <div class="ov-feats">
+    <div class="ov-feat"><div class="ov-icon">◉</div><div>Analyzer</div></div>
+    <div class="ov-feat"><div class="ov-icon">♪</div><div>BPM</div></div>
+    <div class="ov-feat"><div class="ov-icon">♯</div><div>Harmonic</div></div>
+    <div class="ov-feat"><div class="ov-icon">⏱</div><div>Timecode</div></div>
+    <div class="ov-feat"><div class="ov-icon">dB</div><div>SPL</div></div>
+    <div class="ov-feat"><div class="ov-icon">⬡</div><div>Club</div></div>
+    <div class="ov-feat"><div class="ov-icon">DSP</div><div>Venu360</div></div>
   </div>
-  
-  <p class="start-msg">Smaart-style spectrum analyzer con target del track anterior, detector de BPM (auto + tap tempo), y mezcla armónica en Camelot y cifrado americano.</p>
-  <button class="start-btn" id="startBtn">Iniciar con Audio</button>
-  <button class="start-btn start-btn-secondary" id="startNoAudioBtn">Solo BPM/Harmonic (sin mic)</button>
+  <button class="ov-start" id="btnStart">Iniciar con Audio</button>
+  <button class="ov-noaudio" id="btnNoAudio">Solo BPM / Harmonic / Timecode</button>
 </div>
 
 <div id="app">
-  <div class="header">
+  <div class="hdr">
     <div class="brand">
-      <div class="brand-mark"></div>
-      <h1>DJ <span>TOOL</span></h1>
+      <div class="brand-sq"></div>
+      <h1>mientras <span>·</span></h1>
     </div>
-    <div class="header-info">
-      <div class="info-item">
-        <span class="status-dot" id="statusDot"></span>
-        <span id="modeLabel">IDLE</span>
-      </div>
-      <div class="info-item" id="rateInfo" style="display:none">
-        <span id="rateLabel">— Hz</span>
-      </div>
-      <div class="info-item" id="deviceRow" style="display:none; gap:4px;">
-        <select id="deviceSelect" style="background:#1a1a1a;border:1px solid #333;color:#C6FF00;font-family:var(--mono);font-size:9px;padding:3px 6px;border-radius:3px;max-width:160px;">
-          <option>— fuente de audio —</option>
-        </select>
-        <button id="deviceApplyBtn" class="btn" style="font-size:9px;padding:4px 8px;">OK</button>
-      </div>
+    <div class="hdr-right">
+      <div class="dot" id="dot"></div>
+      <span id="liveLabel">IDLE</span>
+      <select class="dev-sel" id="devSel" style="display:none" onchange="switchDevice(this.value)">
+        <option>— fuente —</option>
+      </select>
     </div>
   </div>
 
@@ -919,2152 +281,1323 @@
     <button class="tab active" data-tab="analyzer">◉ Analyzer</button>
     <button class="tab" data-tab="bpm">♪ BPM</button>
     <button class="tab" data-tab="harmonic">♯ Harmonic</button>
+    <button class="tab" data-tab="timecode">⏱ Timecode</button>
+    <button class="tab" data-tab="spl">dB SPL</button>
     <button class="tab" data-tab="club">⬡ Club</button>
+    <button class="tab" data-tab="venu">DSP Venu360</button>
   </div>
 
-  <!-- ANALYZER TAB -->
-  <div class="tab-content active" id="tab-analyzer">
-    <div class="top-row">
-      <div class="metric-card">
-        <div class="metric-label">LUFS-S</div>
-        <div class="metric-value" id="lufsValue">—</div>
-        <div class="metric-target" id="lufsTarget">tgt —</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Peak</div>
-        <div class="metric-value" id="peakValue">—</div>
-        <div class="metric-target" id="peakTarget">tgt —</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">RMS</div>
-        <div class="metric-value" id="rmsValue">—</div>
-        <div class="metric-target" id="rmsTarget">tgt —</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Crest</div>
-        <div class="metric-value" id="crestValue">—</div>
-        <div class="metric-target" id="crestTarget">tgt —</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">L / R</div>
-        <div class="stereo-meter">
-          <div class="stereo-row">
-            <span class="stereo-label">L</span>
-            <div class="stereo-bar"><div class="stereo-fill" id="leftBar"></div></div>
-          </div>
-          <div class="stereo-row">
-            <span class="stereo-label">R</span>
-            <div class="stereo-bar"><div class="stereo-fill" id="rightBar"></div></div>
-          </div>
+  <!-- ANALYZER -->
+  <div class="tc active" id="tc-analyzer">
+    <div class="az-metrics">
+      <div class="az-card"><div class="az-lbl">LUFS-S</div><div class="az-val" id="azLufs">—</div><div class="az-tgt" id="azLufsTgt">tgt —</div></div>
+      <div class="az-card"><div class="az-lbl">Peak dBFS</div><div class="az-val" id="azPeak">—</div><div class="az-tgt" id="azPeakTgt">tgt —</div></div>
+      <div class="az-card"><div class="az-lbl">RMS dBFS</div><div class="az-val" id="azRms">—</div><div class="az-tgt" id="azRmsTgt">tgt —</div></div>
+      <div class="az-card"><div class="az-lbl">Crest</div><div class="az-val" id="azCrest">—</div><div class="az-tgt" id="azCrestTgt">tgt —</div></div>
+      <div class="az-card"><div class="az-lbl">L / R</div>
+        <div class="stereo-wrap">
+          <div class="stereo-r"><span>L</span><div class="stereo-bar"><div class="stereo-fill" id="lBar"></div></div></div>
+          <div class="stereo-r"><span>R</span><div class="stereo-bar"><div class="stereo-fill" id="rBar"></div></div></div>
         </div>
       </div>
     </div>
-
-    <div id="spectrum-container">
-      <canvas id="spectrum"></canvas>
-    </div>
-
-    <div class="bands-row" id="bandsRow"></div>
-
-    <div class="controls">
-      <button class="btn primary" id="lockBtn">⌖ Lock Target</button>
-      <button class="btn danger" id="clearBtn">✕ Clear</button>
-      <button class="btn" id="modeBtn">3-Band</button>
-      <button class="btn active" id="autoLockBtn">Auto: ON</button>
-      <div class="control-group">
-        <span class="control-label">Win</span>
-        <input type="range" id="windowSlider" min="1" max="15" value="5" step="1">
-        <span class="slider-value" id="windowValue">5min</span>
-      </div>
-      <div class="control-group">
-        <span class="control-label">Smooth</span>
-        <input type="range" id="smoothSlider" min="0" max="95" value="70" step="5">
-        <span class="slider-value" id="smoothValue">0.70</span>
-      </div>
-      <div class="control-group">
-        <span class="control-label">Gain</span>
-        <input type="range" id="gainSlider" min="0" max="40" value="0" step="1">
-        <span class="slider-value" id="gainValue">0dB</span>
+    <div class="az-spec"><canvas id="specCanvas"></canvas></div>
+    <div class="az-bands b3" id="bandsRow"></div>
+    <div class="az-ctrls">
+      <button class="btn acc" id="btnLock">⌖ Lock Target</button>
+      <button class="btn red" id="btnClear">✕ Clear</button>
+      <button class="btn" id="btnBands">3-Band</button>
+      <button class="btn on" id="btnAutoLock">Auto: ON</button>
+      <div class="cg"><label>Win</label><input type="range" id="slWin" min="1" max="15" value="5" step="1" oninput="S.winMin=+this.value;document.getElementById('svWin').textContent=this.value+'min'"><span class="sv" id="svWin">5min</span></div>
+      <div class="cg"><label>Smooth</label><input type="range" id="slSmooth" min="0" max="95" value="70" step="5" oninput="document.getElementById('svSmooth').textContent=(this.value/100).toFixed(2)"><span class="sv" id="svSmooth">0.70</span></div>
+      <div class="cg"><label>Gain</label><input type="range" id="slGain" min="0" max="40" value="0" step="1" oninput="setGain(+this.value)"><span class="sv" id="svGain">0dB</span></div>
+      <div class="cg"><label>Zoom</label>
+        <button class="btn" style="padding:4px 8px;font-size:11px;" onclick="adjustZoom(-6)">−</button>
+        <span class="sv" id="svZoom">−90dB</span>
+        <button class="btn" style="padding:4px 8px;font-size:11px;" onclick="adjustZoom(6)">+</button>
       </div>
     </div>
   </div>
 
-  <!-- BPM TAB -->
-  <div class="tab-content" id="tab-bpm">
-    <div class="bpm-layout">
-      <!-- AUTO BPM -->
+  <!-- BPM -->
+  <div class="tc" id="tc-bpm">
+    <div class="bpm-grid">
       <div class="bpm-panel">
-        <div class="panel-title">Auto Detection</div>
-        <div class="bpm-display">
-          <div>
-            <div class="bpm-big" id="autoBpmValue">—</div>
-          </div>
-          <div class="bpm-unit">BPM · DETECTED</div>
-          <div class="bpm-confidence">
-            <span>Confidence</span>
-            <div class="bpm-confidence-bar"><div class="bpm-confidence-fill" id="bpmConfFill"></div></div>
-            <span id="bpmConfText">—</span>
-          </div>
-          <div class="bpm-alternatives" id="bpmAlternatives"></div>
+        <div class="ptitle">Auto Detection
+          <div class="row"><button class="btn" id="btnBpmStart" onclick="toggleBpmDetect()">▶ Start</button><button class="btn" onclick="bpmHalf()">÷2</button><button class="btn" onclick="bpmDouble()">×2</button></div>
         </div>
-        <div class="bpm-controls">
-          <button class="btn primary" id="autoBpmStart">▶ Start Detect</button>
-          <button class="btn" id="autoBpmHalf">÷2</button>
-          <button class="btn" id="autoBpmDouble">×2</button>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+          <div class="bpm-big" id="autoBpm">—</div>
+          <div class="bpm-unit">BPM · DETECTED</div>
+          <div class="bpm-conf"><span>Conf</span><div class="bpm-cbar"><div class="bpm-cfill" id="bpmCfill"></div></div><span id="bpmCpct">—</span></div>
+          <div class="bpm-alts" id="bpmAlts"></div>
         </div>
         <div class="bpm-utils">
-          <div class="util-row">
-            <span class="util-label">1 bar (4/4)</span>
-            <span class="util-value" id="barMs">—</span>
-          </div>
-          <div class="util-row">
-            <span class="util-label">8 bars</span>
-            <span class="util-value" id="eightBarsMs">—</span>
-          </div>
-          <div class="util-row">
-            <span class="util-label">1/4 note</span>
-            <span class="util-value" id="quarterMs">—</span>
-          </div>
-          <div class="util-row">
-            <span class="util-label">1/8 note</span>
-            <span class="util-value" id="eighthMs">—</span>
-          </div>
-          <div class="util-row">
-            <span class="util-label">Delay 1/4</span>
-            <span class="util-value" id="delay4">—</span>
-          </div>
-          <div class="util-row">
-            <span class="util-label">Delay 1/8</span>
-            <span class="util-value" id="delay8">—</span>
-          </div>
+          <div class="util-r"><span class="util-l">1 Bar (4/4)</span><span class="util-v" id="uBar">—</span></div>
+          <div class="util-r"><span class="util-l">8 Bars</span><span class="util-v" id="u8Bar">—</span></div>
+          <div class="util-r"><span class="util-l">¼ note</span><span class="util-v" id="uQ">—</span></div>
+          <div class="util-r"><span class="util-l">⅛ note</span><span class="util-v" id="uE">—</span></div>
+          <div class="util-r"><span class="util-l">Delay ¼</span><span class="util-v" id="uD4">—</span></div>
+          <div class="util-r"><span class="util-l">Delay ⅛</span><span class="util-v" id="uD8">—</span></div>
+          <div class="util-r"><span class="util-l">÷2 =</span><span class="util-v" id="uHalf">—</span></div>
+          <div class="util-r"><span class="util-l">×2 =</span><span class="util-v" id="uDbl">—</span></div>
         </div>
       </div>
-
-      <!-- TAP TEMPO -->
       <div class="bpm-panel">
-        <div class="panel-title">Tap Tempo</div>
-        <div class="tap-area">
-          <div class="bpm-big" id="tapBpmValue">—</div>
+        <div class="ptitle">Tap Tempo
+          <div class="row"><button class="btn" onclick="tapReset()">Reset</button><button class="btn" onclick="tapUseBpm()">→ Use as BPM</button></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
+          <div class="bpm-big" id="tapBpm">—</div>
           <div class="bpm-unit">BPM · TAP</div>
-          <div class="tap-pad" id="tapPad">
-            <div class="tap-label">TAP</div>
+          <div class="tap-pad" id="tapPad"><div class="tap-lbl">TAP</div></div>
+          <div style="display:flex;gap:16px;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;">
+            Taps: <span id="tapCnt" style="color:var(--acc);font-weight:700;">0</span>
+            Avg: <span id="tapAvg" style="color:var(--acc);font-weight:700;">—</span> ms
           </div>
-          <div class="tap-info">
-            Taps: <span id="tapCount">0</span>
-            Avg: <span id="tapAvg">—</span> ms
-          </div>
-        </div>
-        <div class="bpm-controls">
-          <button class="btn" id="tapReset">Reset</button>
-          <button class="btn" id="tapUseAsBpm">Use as BPM</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- HARMONIC TAB -->
-  <div class="tab-content" id="tab-harmonic">
-    <div class="harmonic-layout">
-      <div class="harmonic-controls-panel">
-        <div class="panel-title">Select Key</div>
-        
-        <div class="notation-toggle">
-          <button class="notation-btn active" data-notation="camelot">Camelot</button>
-          <button class="notation-btn" data-notation="musical">Cifrado</button>
-          <button class="notation-btn" data-notation="rkbx">Rekordbox</button>
+  <!-- HARMONIC -->
+  <div class="tc" id="tc-harmonic">
+    <div class="harm-layout">
+      <div class="harm-left">
+        <div class="ptitle" style="margin-bottom:0">Select Key</div>
+        <div class="ntoggle">
+          <button class="nbtn active" data-n="camelot">Camelot</button>
+          <button class="nbtn" data-n="musical">Cifrado</button>
+          <button class="nbtn" data-n="rkbx">Rekordbox</button>
         </div>
-        
         <div class="key-grid" id="keyGrid"></div>
-        
-        <div style="margin-top: 8px; font-size: 9px; color: var(--text-mute); line-height: 1.5;">
-          <div style="color: var(--orange); margin-bottom: 2px;">● Major (B en Camelot)</div>
-          <div style="color: var(--blue);">● Minor (A en Camelot)</div>
+        <div style="font-size:9px;color:var(--mute);line-height:1.8;">
+          <span style="color:var(--orange)">●</span> Major (B en Camelot)<br>
+          <span style="color:var(--blue)">●</span> Minor (A en Camelot)
         </div>
       </div>
+      <div class="harm-right">
+        <div class="ptitle" style="margin-bottom:8px">Compatible Keys</div>
+        <div id="compatDisplay" style="color:var(--mute);font-size:11px;padding:20px 0;">Seleccioná una tonalidad</div>
+      </div>
+    </div>
+  </div>
 
-      <div class="harmonic-display-panel">
-        <div class="panel-title">Compatible Keys</div>
-        <div class="compatibility-display" id="compatDisplay">
-          <div style="text-align:center; color: var(--text-mute); padding: 40px; font-size: 11px;">
-            Seleccioná una tonalidad para ver las compatibles
+  <!-- TIMECODE -->
+  <div class="tc" id="tc-timecode">
+    <div class="tc-layout">
+      <div class="tc-panel">
+        <div class="ptitle">Reloj</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;">
+          <div class="clock-big" id="clockDisplay">00:00:00</div>
+          <div class="clock-date" id="clockDate">—</div>
+          <div style="margin-top:20px;width:100%;">
+            <div class="ptitle" style="margin-bottom:8px;">Cronómetro de Set</div>
+            <div class="set-big" id="setTimer">00:00:00</div>
+            <div class="timer-lbl">SET DURATION</div>
+            <div class="row" style="justify-content:center;margin-top:14px;gap:8px;">
+              <button class="btn acc" id="btnSetStart" onclick="toggleSet()">▶ Start Set</button>
+              <button class="btn" onclick="resetSet()">Reset</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tc-panel">
+        <div class="ptitle">Countdown Timer</div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;">
+          <div class="timer-big" id="countdownDisplay">00:00</div>
+          <div class="timer-lbl" id="timerLbl">COUNTDOWN</div>
+          <div class="row" style="justify-content:center;">
+            <input type="number" class="tc-input" id="timerMin" value="30" min="0" max="999" placeholder="min">
+            <span style="color:var(--dim);">min</span>
+            <input type="number" class="tc-input" id="timerSec" value="0" min="0" max="59" placeholder="sec">
+            <span style="color:var(--dim);">sec</span>
+          </div>
+          <div class="row" style="justify-content:center;gap:8px;">
+            <button class="btn acc" id="btnTimerStart" onclick="toggleTimer()">▶ Start</button>
+            <button class="btn" onclick="resetTimer()">Reset</button>
+          </div>
+        </div>
+        <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border);">
+          <div class="ptitle" style="margin-bottom:8px;">Horarios del Evento</div>
+          <div style="display:flex;flex-direction:column;gap:4px;" id="eventList"></div>
+          <div class="row" style="margin-top:8px;">
+            <input type="time" class="tc-input" id="evTime" style="width:90px;">
+            <input type="text" class="tc-input" id="evName" placeholder="Nombre" style="width:100px;text-align:left;">
+            <button class="btn acc" onclick="addEvent()">+</button>
+            <button class="btn red" onclick="clearEvents()">✕</button>
           </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- CLUB TAB -->
-  <div class="tab-content" id="tab-club">
+  <!-- SPL -->
+  <div class="tc" id="tc-spl">
+    <div class="spl-layout">
+      <div class="spl-top">
+        <div class="spl-big-card"><div class="spl-num" id="splCurrent">—</div><div class="spl-lbl">dB SPL · NOW</div></div>
+        <div class="spl-big-card"><div class="spl-num" style="color:var(--red)" id="splPeak">—</div><div class="spl-lbl">Peak</div></div>
+        <div class="spl-big-card"><div class="spl-num" style="color:var(--orange)" id="splAvg">—</div><div class="spl-lbl">Average</div></div>
+        <div class="spl-big-card"><div class="spl-num" style="color:var(--blue)" id="splMin">—</div><div class="spl-lbl">Min</div></div>
+      </div>
+      <div class="spl-chart-wrap"><canvas id="splCanvas"></canvas></div>
+      <div class="spl-ctrls">
+        <button class="btn acc" id="btnSplStart" onclick="toggleSpl()">▶ Iniciar</button>
+        <button class="btn red" onclick="clearSpl()">✕ Clear</button>
+        <div class="cg"><label>Ref</label><input type="range" id="slSplRef" min="60" max="120" value="94" step="1" oninput="splRef=+this.value;document.getElementById('svSplRef').textContent=this.value+'dB'"><span class="sv" id="svSplRef">94dB</span></div>
+        <div class="cg"><label>Window</label><input type="range" id="slSplWin" min="5" max="60" value="20" step="5" oninput="document.getElementById('svSplWin').textContent=this.value+'min'"><span class="sv" id="svSplWin">20min</span></div>
+        <button class="btn" onclick="exportSpl()">↓ CSV</button>
+        <div id="splTimestamps"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLUB -->
+  <div class="tc" id="tc-club">
     <div class="club-layout">
-
-      <!-- LEFT: Floor Plan -->
       <div class="club-main">
-        <div class="club-panel" style="flex-shrink:0;">
-          <div class="club-panel-title">
-            <span>⬡ Plano · Casa Colombo · Planta Baja</span>
-            <div style="display:flex;gap:4px;">
-              <button class="fp-tool-btn active" id="fpToolMove" onclick="setFpTool('move')">✥ Mover</button>
-              <button class="fp-tool-btn" id="fpToolAdd" onclick="setFpTool('add')">+ Agregar</button>
-              <button class="fp-tool-btn" id="fpToolDel" style="color:var(--red);border-color:var(--red);" onclick="setFpTool('del')">✕ Borrar</button>
-              <button class="fp-tool-btn" onclick="resetSpeakers()">Reset</button>
+        <div class="panel" style="flex-shrink:0;padding:8px;">
+          <div class="row">
+            <span style="font-size:10px;color:var(--acc);font-weight:700;font-family:var(--disp);">⬡ Casa Colombo · Planta Baja</span>
+            <div style="margin-left:auto;display:flex;gap:4px;">
+              <button class="fp-btn on" id="fpMove" onclick="fpTool('move')">✥ Mover</button>
+              <button class="fp-btn" id="fpAdd" onclick="fpTool('add')">+ Add</button>
+              <button class="fp-btn" id="fpDel" style="color:var(--red)" onclick="fpTool('del')">✕ Del</button>
+              <button class="fp-btn" onclick="fpReset()">Reset</button>
             </div>
           </div>
-          <div style="display:flex;gap:4px;flex-wrap:wrap;align-items:center;">
-            <span style="font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;">Tipo:</span>
-            <button class="fp-tool-btn active" id="spTypeK12" onclick="setSpeakerType('K12.2')">QSC K12.2</button>
-            <button class="fp-tool-btn" id="spTypeSub" onclick="setSpeakerType('SUB')">SUB DAS 18"</button>
-            <button class="fp-tool-btn" id="spTypeMonitor" onclick="setSpeakerType('MON')">Monitor</button>
-            <div style="display:flex;gap:8px;margin-left:6px;font-size:9px;color:var(--text-dim);">
-              <span><span style="color:#C6FF00">●</span> K12.2</span>
-              <span><span style="color:#ff3060">●</span> SUB</span>
-              <span><span style="color:#30aaff">●</span> MON</span>
-            </div>
+          <div class="row" style="margin-top:6px;">
+            <button class="fp-btn on" id="spK12" onclick="spType('K12.2')">QSC K12.2</button>
+            <button class="fp-btn" id="spSub" onclick="spType('SUB')">SUB DAS 18"</button>
+            <button class="fp-btn" id="spMon" onclick="spType('MON')">Monitor</button>
+            <span style="font-size:9px;color:var(--dim);margin-left:4px;"><span style="color:#C6FF00">●</span> K12 <span style="color:#ff3060">●</span> SUB <span style="color:#30aaff">●</span> MON</span>
           </div>
         </div>
-        <div class="floorplan-container">
-          <canvas id="floorCanvas"></canvas>
+        <div class="fp-wrap"><canvas id="floorCanvas"></canvas></div>
+      </div>
+      <div class="club-side">
+        <!-- Delay Calc -->
+        <div class="panel">
+          <div class="ptitle">⟳ Delay por Distancia</div>
+          <div class="row" style="gap:8px;">
+            <div style="display:flex;flex-direction:column;gap:3px;flex:1;">
+              <label style="font-size:8px;color:var(--dim);text-transform:uppercase;">Distancia (m)</label>
+              <input type="number" id="dlDist" value="10" min="0.1" max="100" step="0.1" oninput="calcDelay()" style="background:var(--panel2);border:1px solid var(--border2);color:var(--text);padding:8px;border-radius:3px;font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;width:100%;">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:3px;flex:1;">
+              <label style="font-size:8px;color:var(--dim);text-transform:uppercase;">Temp °C</label>
+              <input type="number" id="dlTemp" value="22" min="-10" max="45" step="1" oninput="calcDelay()" style="background:var(--panel2);border:1px solid var(--border2);color:var(--text);padding:8px;border-radius:3px;font-family:var(--mono);font-size:14px;font-weight:700;text-align:center;width:100%;">
+            </div>
+          </div>
+          <div class="delay-res" style="margin-top:6px;">
+            <div class="dr-item"><div class="dr-val" id="dlMs">—</div><div class="dr-lbl">ms</div></div>
+            <div class="dr-item"><div class="dr-val" id="dlSmp">—</div><div class="dr-lbl">Samples @48k</div></div>
+            <div class="dr-item"><div class="dr-val" id="dlSpd" style="font-size:13px;">—</div><div class="dr-lbl">m/s sonido</div></div>
+            <div class="dr-item"><div class="dr-val" id="dlSmp44" style="font-size:13px;">—</div><div class="dr-lbl">Samples @44.1k</div></div>
+          </div>
+          <div class="row" style="margin-top:6px;flex-wrap:wrap;gap:3px;">
+            <span style="font-size:8px;color:var(--dim);">Presets:</span>
+            <button class="fp-btn" onclick="setDlDist(3)">3m</button>
+            <button class="fp-btn" onclick="setDlDist(5)">5m</button>
+            <button class="fp-btn" onclick="setDlDist(8)">8m</button>
+            <button class="fp-btn" onclick="setDlDist(10)">10m</button>
+            <button class="fp-btn" onclick="setDlDist(15)">15m</button>
+            <button class="fp-btn" onclick="setDlDist(20)">20m</button>
+          </div>
+        </div>
+        <!-- Phase -->
+        <div class="panel">
+          <div class="ptitle">⟲ Coherencia de Fase
+            <button class="fp-btn" id="btnPhase" onclick="togglePhase()">▶ Medir</button>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;text-align:center;">
+            <div><div class="ph-val good" id="phLow">—°</div><div style="font-size:8px;color:var(--mute);margin-top:2px;">Low</div></div>
+            <div><div class="ph-val" id="phMid">—°</div><div style="font-size:8px;color:var(--mute);margin-top:2px;">Mid</div></div>
+            <div><div class="ph-val" id="phHigh">—°</div><div style="font-size:8px;color:var(--mute);margin-top:2px;">High</div></div>
+          </div>
+          <div class="phase-wrap" style="margin-top:6px;"><canvas id="phaseCanvas"></canvas></div>
+          <div id="phaseWarn" style="font-size:9px;color:var(--red);display:none;margin-top:4px;font-weight:700;">⚠ Posible inversión de fase</div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- RIGHT: Tools -->
-      <div class="club-sidebar">
-
-        <!-- SPL LOGGER -->
-        <div class="club-panel">
-          <div class="club-panel-title">
-            <span>◉ SPL Logger</span>
-            <div style="display:flex;gap:4px;">
-              <button class="fp-tool-btn" id="splStartBtn" onclick="toggleSplLog()">▶ Iniciar</button>
-              <button class="fp-tool-btn" style="color:var(--red)" onclick="clearSplLog()">✕</button>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:80px 1fr;gap:8px;align-items:center;">
-            <div>
-              <div class="spl-value" id="splCurrentVal">—</div>
-              <div class="spl-sub">dB SPL</div>
-            </div>
-            <div class="spl-stats">
-              <div><div class="spl-stat-val" id="splMax">—</div><div class="spl-stat-lbl">Peak</div></div>
-              <div><div class="spl-stat-val" id="splAvg">—</div><div class="spl-stat-lbl">Avg</div></div>
-              <div><div class="spl-stat-val" id="splMin">—</div><div class="spl-stat-lbl">Min</div></div>
-            </div>
-          </div>
-          <div class="spl-chart-wrap"><canvas id="splCanvas"></canvas></div>
-          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
-            <div class="control-group">
-              <span class="control-label">Ref</span>
-              <input type="range" id="splRefSlider" min="60" max="120" value="94" step="1" style="width:60px;" oninput="splRefDb=parseInt(this.value);document.getElementById('splRefVal').textContent=this.value+'dB'">
-              <span class="slider-value" id="splRefVal">94dB</span>
-            </div>
-            <div class="control-group">
-              <span class="control-label">Win</span>
-              <input type="range" id="splWinSlider" min="5" max="60" value="20" step="5" style="width:50px;" oninput="document.getElementById('splWinVal').textContent=this.value+'min'">
-              <span class="slider-value" id="splWinVal">20min</span>
-            </div>
-            <button class="fp-tool-btn" onclick="exportSplCsv()">↓ CSV</button>
-          </div>
-          <div id="splTimestamps" style="font-size:8px;color:var(--text-mute);max-height:50px;overflow-y:auto;line-height:1.6;"></div>
+  <!-- VENU360 -->
+  <div class="tc" id="tc-venu">
+    <div class="venu-layout">
+      <div class="venu-nav">
+        <div style="font-size:9px;color:var(--mute);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px;">Presets</div>
+        <button class="venu-preset-btn active" onclick="venuPreset(0,this)">12 · Colombo Main FOG</button>
+        <button class="venu-preset-btn" onclick="venuPreset(1,this)">13 · Studio Colombo FOG</button>
+        <button class="venu-preset-btn" onclick="venuPreset(2,this)">+ Nuevo Preset</button>
+        <div style="margin-top:auto;padding-top:8px;border-top:1px solid var(--border);">
+          <button class="btn acc" style="width:100%;" onclick="venuSave()">💾 Guardar</button>
         </div>
-
-        <!-- DELAY CALCULATOR -->
-        <div class="club-panel">
-          <div class="club-panel-title">⟳ Delay por Distancia</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-            <div style="display:flex;flex-direction:column;gap:3px;">
-              <label style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Distancia (m)</label>
-              <input type="number" id="delayDist" value="10" min="0.1" max="100" step="0.1" oninput="calcDelay()" style="background:var(--panel-2);border:1px solid var(--border-2);color:var(--text);padding:8px;border-radius:3px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;width:100%;">
-            </div>
-            <div style="display:flex;flex-direction:column;gap:3px;">
-              <label style="font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.5px;">Temp. °C</label>
-              <input type="number" id="delayTemp" value="22" min="-10" max="45" step="1" oninput="calcDelay()" style="background:var(--panel-2);border:1px solid var(--border-2);color:var(--text);padding:8px;border-radius:3px;font-family:var(--mono);font-size:13px;font-weight:700;text-align:center;width:100%;">
-            </div>
-          </div>
-          <div style="background:var(--panel-2);border:1px solid var(--border-2);border-radius:4px;padding:10px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
-            <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;font-family:var(--display);" id="delayMs">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Delay (ms)</div></div>
-            <div style="text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;font-family:var(--display);" id="delaySamples">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Samples @48k</div></div>
-            <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:var(--text);" id="delaySpeedSound">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">m/s sonido</div></div>
-            <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:var(--text);" id="delayFrames">—</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Samples @44.1k</div></div>
-          </div>
-          <div style="font-size:9px;color:var(--text-mute);margin-top:2px;">Presets:</div>
-          <div style="display:flex;gap:4px;flex-wrap:wrap;">
-            <button class="fp-tool-btn" onclick="setDelayDist(3)">3m</button>
-            <button class="fp-tool-btn" onclick="setDelayDist(5)">5m</button>
-            <button class="fp-tool-btn" onclick="setDelayDist(8)">8m</button>
-            <button class="fp-tool-btn" onclick="setDelayDist(10)">10m</button>
-            <button class="fp-tool-btn" onclick="setDelayDist(15)">15m</button>
-            <button class="fp-tool-btn" onclick="setDelayDist(20)">20m</button>
-          </div>
-        </div>
-
-        <!-- PHASE METER -->
-        <div class="club-panel">
-          <div class="club-panel-title">
-            <span>⟲ Coherencia de Fase</span>
-            <button class="fp-tool-btn" id="phaseStartBtn" onclick="togglePhase()">▶ Medir</button>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">
-            <div style="text-align:center;"><div class="phase-meter-val good" id="phaseLow">—°</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Low &lt;300Hz</div></div>
-            <div style="text-align:center;"><div class="phase-meter-val" id="phaseMid">—°</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">Mid 300-4k</div></div>
-            <div style="text-align:center;"><div class="phase-meter-val" id="phaseHigh">—°</div><div style="font-size:8px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.5px;margin-top:2px;">High &gt;4k</div></div>
-          </div>
-          <div style="height:80px;background:#0d0d0d;border-radius:4px;overflow:hidden;border:1px solid var(--border-2);"><canvas id="phaseCanvas"></canvas></div>
-          <div style="font-size:9px;color:var(--text-mute);line-height:1.8;">
-            <span style="color:var(--accent)">■</span> 0±30° coherente &nbsp;
-            <span style="color:var(--orange)">■</span> ±30-90° parcial &nbsp;
-            <span style="color:var(--red)">■</span> ±90-180° inversión
-          </div>
-          <div id="phaseWarning" style="font-size:10px;color:var(--red);display:none;font-weight:700;">⚠ Posible inversión de fase detectada</div>
-        </div>
-
       </div>
+      <div class="venu-main" id="venuMain"></div>
     </div>
   </div>
 
 </div>
+
 <script>
 'use strict';
-
-// ============ CONFIGURATION ============
-const CONFIG = {
-  fftSize: 8192,
-  smoothing: 0.7,
-  minDb: -90,
-  maxDb: -10,
-  bands3: [
-    { name: 'LOW',  fmin: 20,   fmax: 300,   color: '#ff3060', freq: '20-300Hz' },
-    { name: 'MID',  fmin: 300,  fmax: 4000,  color: '#C6FF00', freq: '0.3-4kHz' },
-    { name: 'HIGH', fmin: 4000, fmax: 22000, color: '#30aaff', freq: '4-22kHz' }
-  ],
-  bands4: [
-    { name: 'LOW',     fmin: 20,    fmax: 220,   color: '#ff3060', freq: '20-220Hz' },
-    { name: 'LO-MID',  fmin: 220,   fmax: 1400,  color: '#ff9030', freq: '0.22-1.4k' },
-    { name: 'HI-MID',  fmin: 1400,  fmax: 7000,  color: '#C6FF00', freq: '1.4-7k' },
-    { name: 'HIGH',    fmin: 7000,  fmax: 22000, color: '#30aaff', freq: '7-22k' }
-  ],
-  trackChangeThreshold: -45,
-  trackChangeDuration: 1500,
-};
-
-// ============ STATE ============
-const state = {
-  audioCtx: null,
-  analyser: null,
-  splitter: null,
-  analyserL: null,
-  analyserR: null,
-  gainNode: null,
-  bpmFilterNode: null,
-  bpmAnalyser: null,
+// ==================== AUDIO ENGINE ====================
+const A = {
+  ctx: null, analyser: null, analyserL: null, analyserR: null,
+  splitter: null, gainNode: null, bpmFilter: null, bpmAnalyser: null,
   stream: null,
-  freqData: null,
-  timeData: null,
-  timeDataL: null,
-  timeDataR: null,
-  bpmTimeData: null,
-  running: false,
-  bandMode: 3,
-  bands: CONFIG.bands3,
-  historyFrames: [],
-  windowMinutes: 5,
-  target: null,
-  autoLock: true,
-  lowLevelStart: null,
-  lastLockTime: 0,
-  smoothedSpectrum: null,
-  peakHoldValue: -Infinity,
-  peakHoldTime: 0,
-  gainDb: 0,
-  
-  // BPM detection
-  bpmDetecting: false,
-  bpmEnergyHistory: [],
-  bpmPeaks: [],
-  bpmCurrentValue: null,
-  bpmConfidence: 0,
-  bpmAlternatives: [],
-  
-  // Tap tempo
-  tapTimes: [],
-  tapTimeoutId: null,
-  
-  // Harmonic
-  selectedKey: null,
-  notation: 'camelot',
-  
-  // Audio devices
-  audioDevices: [],
-  selectedDeviceId: null,
+  freqData: null, timeData: null, tL: null, tR: null, bpmData: null,
+  smoothed: null, running: false,
 };
 
-// ============ DOM HELPER ============
-const $ = (id) => document.getElementById(id);
-
-// ============ TAB SWITCHING ============
-document.querySelectorAll('.tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    const tabId = tab.dataset.tab;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    tab.classList.add('active');
-    $('tab-' + tabId).classList.add('active');
-  });
-});
-
-// ============ AUDIO DEVICE MANAGEMENT ============
-async function enumerateAudioDevices() {
-  try {
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    state.audioDevices = devices.filter(d => d.kind === 'audioinput');
-    
-    const select = $('deviceSelect');
-    select.innerHTML = '';
-    
-    state.audioDevices.forEach((dev, i) => {
-      const opt = document.createElement('option');
-      opt.value = dev.deviceId;
-      opt.textContent = dev.label || `Micrófono ${i + 1}`;
-      if (dev.deviceId === state.selectedDeviceId) opt.selected = true;
-      select.appendChild(opt);
-    });
-    
-    $('deviceRow').style.display = 'flex';
-  } catch (e) {
-    console.warn('No se pudo listar dispositivos:', e);
-  }
-}
-
-async function switchAudioDevice(deviceId) {
-  if (!state.audioCtx) return;
-  
-  // Stop existing stream
-  if (state.stream) {
-    state.stream.getTracks().forEach(t => t.stop());
-  }
-  
-  try {
-    state.selectedDeviceId = deviceId;
-    state.stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        deviceId: deviceId ? { exact: deviceId } : undefined,
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-        channelCount: 2,
-      }
-    });
-    
-    const source = state.audioCtx.createMediaStreamSource(state.stream);
-    source.connect(state.gainNode);
-    
-    const btn = $('deviceApplyBtn');
-    btn.textContent = '✓';
-    btn.style.color = '#C6FF00';
-    setTimeout(() => { btn.textContent = 'OK'; btn.style.color = ''; }, 1500);
-  } catch (e) {
-    alert('Error cambiando dispositivo: ' + e.message);
-  }
-}
-
-// ============ AUDIO INIT ============
 async function startAudio() {
   try {
-    state.audioCtx = new (window.AudioContext || window.webkitAudioContext)({
-      sampleRate: 48000,
-      latencyHint: 'interactive'
+    A.ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000, latencyHint: 'interactive' });
+    A.stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, channelCount: 2 }
     });
-    
-    state.stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: false,
-        noiseSuppression: false,
-        autoGainControl: false,
-        channelCount: 2,
-      }
-    });
-    
-    const source = state.audioCtx.createMediaStreamSource(state.stream);
-    
-    state.gainNode = state.audioCtx.createGain();
-    state.gainNode.gain.value = 1.0;
-    
-    state.analyser = state.audioCtx.createAnalyser();
-    state.analyser.fftSize = CONFIG.fftSize;
-    state.analyser.smoothingTimeConstant = CONFIG.smoothing;
-    state.analyser.minDecibels = CONFIG.minDb;
-    state.analyser.maxDecibels = CONFIG.maxDb;
-    
-    state.splitter = state.audioCtx.createChannelSplitter(2);
-    state.analyserL = state.audioCtx.createAnalyser();
-    state.analyserR = state.audioCtx.createAnalyser();
-    state.analyserL.fftSize = 2048;
-    state.analyserR.fftSize = 2048;
-    
-    // BPM detection chain: lowpass filter (focus on kick/bass) + analyser
-    state.bpmFilterNode = state.audioCtx.createBiquadFilter();
-    state.bpmFilterNode.type = 'lowpass';
-    state.bpmFilterNode.frequency.value = 150;
-    state.bpmFilterNode.Q.value = 1;
-    
-    state.bpmAnalyser = state.audioCtx.createAnalyser();
-    state.bpmAnalyser.fftSize = 1024;
-    state.bpmAnalyser.smoothingTimeConstant = 0;
-    
-    source.connect(state.gainNode);
-    state.gainNode.connect(state.analyser);
-    state.gainNode.connect(state.splitter);
-    state.splitter.connect(state.analyserL, 0);
-    state.splitter.connect(state.analyserR, 1);
-    state.gainNode.connect(state.bpmFilterNode);
-    state.bpmFilterNode.connect(state.bpmAnalyser);
-    
-    state.freqData = new Float32Array(state.analyser.frequencyBinCount);
-    state.timeData = new Float32Array(state.analyser.fftSize);
-    state.timeDataL = new Float32Array(state.analyserL.fftSize);
-    state.timeDataR = new Float32Array(state.analyserR.fftSize);
-    state.bpmTimeData = new Float32Array(state.bpmAnalyser.fftSize);
-    state.smoothedSpectrum = new Float32Array(state.analyser.frequencyBinCount);
-    state.smoothedSpectrum.fill(-Infinity);
-    
-    state.running = true;
-    $('statusDot').classList.add('active');
-    $('modeLabel').textContent = 'LIVE';
-    $('rateInfo').style.display = 'flex';
-    $('rateLabel').textContent = state.audioCtx.sampleRate + ' Hz';
-    
-    // Enumerate devices now that we have permission
-    await enumerateAudioDevices();
-    // Mark current device as selected
-    if (state.stream) {
-      const track = state.stream.getAudioTracks()[0];
-      if (track) {
-        const settings = track.getSettings();
-        state.selectedDeviceId = settings.deviceId;
-        const select = $('deviceSelect');
-        if (select) select.value = state.selectedDeviceId || '';
-      }
-    }
-    
-    await loadPersistedState();
-    requestAnimationFrame(loop);
-    requestWakeLock();
+    const src = A.ctx.createMediaStreamSource(A.stream);
+    A.gainNode = A.ctx.createGain();
+    A.analyser = A.ctx.createAnalyser();
+    A.analyser.fftSize = 8192;
+    A.analyser.smoothingTimeConstant = 0.7;
+    A.analyser.minDecibels = S.zoomMin;
+    A.analyser.maxDecibels = -10;
+    A.splitter = A.ctx.createChannelSplitter(2);
+    A.analyserL = A.ctx.createAnalyser(); A.analyserL.fftSize = 2048;
+    A.analyserR = A.ctx.createAnalyser(); A.analyserR.fftSize = 2048;
+    A.bpmFilter = A.ctx.createBiquadFilter();
+    A.bpmFilter.type = 'lowpass'; A.bpmFilter.frequency.value = 150;
+    A.bpmAnalyser = A.ctx.createAnalyser(); A.bpmAnalyser.fftSize = 1024; A.bpmAnalyser.smoothingTimeConstant = 0;
+    src.connect(A.gainNode);
+    A.gainNode.connect(A.analyser);
+    A.gainNode.connect(A.splitter);
+    A.splitter.connect(A.analyserL, 0);
+    A.splitter.connect(A.analyserR, 1);
+    A.gainNode.connect(A.bpmFilter);
+    A.bpmFilter.connect(A.bpmAnalyser);
+    A.freqData = new Float32Array(A.analyser.frequencyBinCount);
+    A.timeData = new Float32Array(A.analyser.fftSize);
+    A.tL = new Float32Array(A.analyserL.fftSize);
+    A.tR = new Float32Array(A.analyserR.fftSize);
+    A.bpmData = new Float32Array(A.bpmAnalyser.fftSize);
+    A.smoothed = new Float32Array(A.analyser.frequencyBinCount);
+    A.smoothed.fill(-Infinity);
+    A.running = true;
+    $('dot').classList.add('on');
+    $('liveLabel').textContent = 'LIVE';
+    $('devSel').style.display = 'block';
+    await enumDevices();
+    loadState();
+    requestAnimationFrame(mainLoop);
+    tryWakeLock();
     return true;
-  } catch (err) {
-    alert('Error de audio: ' + err.message + '\n\nVerificá permisos.');
-    return false;
-  }
+  } catch (e) { alert('Error audio: ' + e.message); return false; }
 }
 
-function startNoAudio() {
-  state.running = true;
-  $('modeLabel').textContent = 'NO AUDIO';
-  loadPersistedState();
-  // Switch to BPM tab by default
-  document.querySelector('[data-tab="bpm"]').click();
-}
-
-// ============ SPECTRUM ANALYSIS ============
-function getFreqIndex(freq) {
-  if (!state.audioCtx) return 0;
-  const nyquist = state.audioCtx.sampleRate / 2;
-  return Math.round(freq / nyquist * state.analyser.frequencyBinCount);
-}
-
-function getBandLevel(spectrum, fmin, fmax) {
-  const i1 = getFreqIndex(fmin);
-  const i2 = Math.min(getFreqIndex(fmax), spectrum.length - 1);
-  let sum = 0, count = 0;
-  for (let i = i1; i <= i2; i++) {
-    if (isFinite(spectrum[i])) {
-      sum += Math.pow(10, spectrum[i] / 10);
-      count++;
+async function enumDevices() {
+  try {
+    const devs = await navigator.mediaDevices.enumerateDevices();
+    const sel = $('devSel');
+    sel.innerHTML = '';
+    devs.filter(d => d.kind === 'audioinput').forEach((d, i) => {
+      const o = document.createElement('option');
+      o.value = d.deviceId;
+      o.textContent = d.label || 'Mic ' + (i + 1);
+      sel.appendChild(o);
+    });
+    if (A.stream) {
+      const sid = A.stream.getAudioTracks()[0]?.getSettings()?.deviceId;
+      if (sid) sel.value = sid;
     }
-  }
-  return count === 0 ? -Infinity : 10 * Math.log10(sum / count);
+  } catch (e) {}
 }
 
-function getAllBandLevels(spectrum) {
-  return state.bands.map(b => getBandLevel(spectrum, b.fmin, b.fmax));
+async function switchDevice(id) {
+  if (!A.ctx || !id) return;
+  if (A.stream) A.stream.getTracks().forEach(t => t.stop());
+  try {
+    A.stream = await navigator.mediaDevices.getUserMedia({
+      audio: { deviceId: { exact: id }, echoCancellation: false, noiseSuppression: false, autoGainControl: false }
+    });
+    A.ctx.createMediaStreamSource(A.stream).connect(A.gainNode);
+  } catch (e) { alert('Error: ' + e.message); }
+}
+navigator.mediaDevices?.addEventListener('devicechange', () => { if (A.ctx) enumDevices(); });
+
+function setGain(db) {
+  S.gainDb = db;
+  document.getElementById('svGain').textContent = db + 'dB';
+  if (A.gainNode) A.gainNode.gain.value = Math.pow(10, db / 20);
 }
 
-function computeKWeightedLoudness(timeData) {
-  let sumSq = 0;
-  for (let i = 0; i < timeData.length; i++) sumSq += timeData[i] * timeData[i];
-  const meanSq = sumSq / timeData.length;
-  return meanSq <= 0 ? -Infinity : 10 * Math.log10(meanSq) - 0.691;
+function adjustZoom(delta) {
+  S.zoomMin = Math.min(-30, Math.max(-120, S.zoomMin + delta));
+  document.getElementById('svZoom').textContent = S.zoomMin + 'dB';
+  if (A.analyser) A.analyser.minDecibels = S.zoomMin;
 }
 
-function computeRMS(timeData) {
-  let sumSq = 0;
-  for (let i = 0; i < timeData.length; i++) sumSq += timeData[i] * timeData[i];
-  const rms = Math.sqrt(sumSq / timeData.length);
-  return rms > 0 ? 20 * Math.log10(rms) : -Infinity;
-}
+// ==================== STATE ====================
+const S = {
+  bandMode: 3, bands: null, winMin: 5, gainDb: 0, zoomMin: -90,
+  autoLock: true, target: null, history: [],
+  lowStart: null, lastLock: 0,
+  bpmDetecting: false, bpmEnergy: [], bpmPeaks: [], bpmVal: null, bpmConf: 0, bpmAlts: [],
+  tapTimes: [],
+  notation: 'camelot', selKey: null,
+  setRunning: false, setStart: null, setElapsed: 0,
+  timerRunning: false, timerEnd: null, timerRemain: 0,
+  events: [],
+  splLogging: false, splLog: [], splRef: 94, splMax: -Infinity, splMin: Infinity, splSum: 0, splN: 0,
+  phaseMeasuring: false, phaseHist: [],
+  fpTool: 'move', fpType: 'K12.2', speakers: [], fpNextId: 1,
+  venuPresets: null,
+};
 
-function computePeak(timeData) {
-  let peak = 0;
-  for (let i = 0; i < timeData.length; i++) {
-    const abs = Math.abs(timeData[i]);
-    if (abs > peak) peak = abs;
-  }
-  return peak > 0 ? 20 * Math.log10(peak) : -Infinity;
-}
-
-// ============ BPM DETECTION ============
-// Energy-based onset detection + autocorrelation on inter-onset intervals
-function processBpmFrame(now) {
-  if (!state.bpmDetecting || !state.bpmAnalyser) return;
-  
-  state.bpmAnalyser.getFloatTimeDomainData(state.bpmTimeData);
-  
-  // Compute RMS energy of this frame (lowpass-filtered signal)
-  let sumSq = 0;
-  for (let i = 0; i < state.bpmTimeData.length; i++) {
-    sumSq += state.bpmTimeData[i] * state.bpmTimeData[i];
-  }
-  const energy = Math.sqrt(sumSq / state.bpmTimeData.length);
-  
-  state.bpmEnergyHistory.push({ time: now, energy });
-  
-  // Keep only last 8 seconds of energy history
-  const cutoff = now - 8000;
-  while (state.bpmEnergyHistory.length > 0 && state.bpmEnergyHistory[0].time < cutoff) {
-    state.bpmEnergyHistory.shift();
-  }
-  
-  // Detect peaks (kick hits) using adaptive threshold
-  if (state.bpmEnergyHistory.length > 20) {
-    detectBpmPeaks(now);
-  }
-}
-
-function detectBpmPeaks(now) {
-  const hist = state.bpmEnergyHistory;
-  if (hist.length < 10) return;
-  
-  // Compute local average of recent energy (shorter window = more reactive)
-  const recent = hist.slice(-20);
-  let avg = 0;
-  for (const e of recent) avg += e.energy;
-  avg /= recent.length;
-  
-  // Current energy
-  const current = hist[hist.length - 1];
-  const prev1 = hist[hist.length - 2];
-  const prev2 = hist[hist.length - 3];
-  
-  // Lower threshold for mic input (1.3x instead of 1.5x)
-  const threshold = avg * 1.3;
-  const isPeak = current.energy > threshold && 
-                 current.energy > prev1.energy && 
-                 prev1.energy >= prev2.energy;
-  
-  if (isPeak) {
-    // Don't add peaks too close together (would imply BPM > 300)
-    const lastPeak = state.bpmPeaks[state.bpmPeaks.length - 1];
-    if (!lastPeak || (current.time - lastPeak.time) > 180) {
-      state.bpmPeaks.push({ time: current.time, energy: current.energy });
-      
-      // Keep last 64 peaks
-      if (state.bpmPeaks.length > 64) {
-        state.bpmPeaks.shift();
-      }
-      
-      computeBpmFromPeaks();
-    }
-  }
-}
-
-function computeBpmFromPeaks() {
-  if (state.bpmPeaks.length < 8) return;
-  
-  // Compute inter-onset intervals (IOIs)
-  const iois = [];
-  for (let i = 1; i < state.bpmPeaks.length; i++) {
-    iois.push(state.bpmPeaks[i].time - state.bpmPeaks[i-1].time);
-  }
-  
-  // Histogram of BPMs (60..200 range)
-  const bpmCounts = new Map();
-  
-  for (const ioi of iois) {
-    if (ioi < 200 || ioi > 1500) continue;
-    
-    // Test this IOI as direct beat, half-beat, double-beat
-    const candidates = [
-      60000 / ioi,           // direct
-      60000 / (ioi * 2),     // half (1 beat = 2 IOIs)
-      60000 / (ioi / 2),     // double (2 beats = 1 IOI)
-    ];
-    
-    for (let bpm of candidates) {
-      // Normalize to 60-200 range by doubling/halving
-      while (bpm < 60) bpm *= 2;
-      while (bpm > 200) bpm /= 2;
-      if (bpm < 60 || bpm > 200) continue;
-      
-      const rounded = Math.round(bpm * 2) / 2; // 0.5 BPM bins
-      bpmCounts.set(rounded, (bpmCounts.get(rounded) || 0) + 1);
-    }
-  }
-  
-  if (bpmCounts.size === 0) return;
-  
-  // Find top BPMs
-  const sorted = Array.from(bpmCounts.entries()).sort((a, b) => b[1] - a[1]);
-  const topBpm = sorted[0][0];
-  const topCount = sorted[0][1];
-  const totalCounts = Array.from(bpmCounts.values()).reduce((a, b) => a + b, 0);
-  const confidence = Math.min(100, (topCount / totalCounts) * 250);
-  
-  state.bpmCurrentValue = topBpm;
-  state.bpmConfidence = confidence;
-  state.bpmAlternatives = sorted.slice(1, 4).map(([bpm]) => bpm);
-}
-
-function updateBpmDisplay() {
-  if (state.bpmCurrentValue) {
-    $('autoBpmValue').textContent = state.bpmCurrentValue.toFixed(1);
-    $('bpmConfFill').style.width = state.bpmConfidence + '%';
-    $('bpmConfText').textContent = Math.round(state.bpmConfidence) + '%';
-    
-    const altsEl = $('bpmAlternatives');
-    altsEl.innerHTML = state.bpmAlternatives.length > 0 
-      ? '<div class="bpm-alt">Alt: ' + state.bpmAlternatives.map(b => `<span>${b.toFixed(1)}</span>`).join(' · ') + '</div>'
-      : '';
-    
-    updateBpmUtils(state.bpmCurrentValue);
-  }
-}
-
-function updateBpmUtils(bpm) {
-  if (!bpm || bpm <= 0) return;
-  const quarter = 60000 / bpm; // ms per quarter note
-  const eighth = quarter / 2;
-  const sixteenth = quarter / 4;
-  const bar = quarter * 4;
-  $('barMs').textContent = bar.toFixed(0) + ' ms';
-  $('eightBarsMs').textContent = (bar * 8 / 1000).toFixed(2) + ' s';
-  $('quarterMs').textContent = quarter.toFixed(1) + ' ms';
-  $('eighthMs').textContent = eighth.toFixed(1) + ' ms';
-  $('delay4').textContent = quarter.toFixed(0) + ' ms';
-  $('delay8').textContent = eighth.toFixed(0) + ' ms';
-}
-
-// ============ TAP TEMPO ============
-function handleTap() {
-  const now = performance.now();
-  
-  // Reset if more than 2 seconds since last tap
-  if (state.tapTimes.length > 0) {
-    const lastTap = state.tapTimes[state.tapTimes.length - 1];
-    if (now - lastTap > 2000) {
-      state.tapTimes = [];
-    }
-  }
-  
-  state.tapTimes.push(now);
-  
-  // Keep last 16 taps
-  if (state.tapTimes.length > 16) {
-    state.tapTimes.shift();
-  }
-  
-  // Visual feedback
-  const pad = $('tapPad');
-  pad.classList.add('tapped');
-  setTimeout(() => pad.classList.remove('tapped'), 80);
-  
-  // Compute BPM from intervals
-  if (state.tapTimes.length >= 2) {
-    const intervals = [];
-    for (let i = 1; i < state.tapTimes.length; i++) {
-      intervals.push(state.tapTimes[i] - state.tapTimes[i-1]);
-    }
-    const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-    const bpm = 60000 / avg;
-    
-    $('tapBpmValue').textContent = bpm.toFixed(1);
-    $('tapAvg').textContent = avg.toFixed(0);
-  }
-  
-  $('tapCount').textContent = state.tapTimes.length;
-  
-  // Auto-reset timer
-  clearTimeout(state.tapTimeoutId);
-  state.tapTimeoutId = setTimeout(() => {
-    // Don't clear automatically — let user reset manually
-  }, 5000);
-}
-
-function resetTap() {
-  state.tapTimes = [];
-  $('tapBpmValue').textContent = '—';
-  $('tapAvg').textContent = '—';
-  $('tapCount').textContent = '0';
-}
-
-// ============ HARMONIC MIXING ============
-// Camelot wheel: 1A-12A (minor), 1B-12B (major)
-// Mapping musical key -> Camelot code
-// Rekordbox notation: maj = major, min = minor, uses same note names as musical
-// but formatted as Rekordbox displays them in its library
-const KEYS = [
-  // musical = cifrado americano, camelot = Camelot wheel, rkbx = Rekordbox display
-  { musical: 'C',   camelot: '8B',  rkbx: 'C maj',  type: 'major' },
-  { musical: 'G',   camelot: '9B',  rkbx: 'G maj',  type: 'major' },
-  { musical: 'D',   camelot: '10B', rkbx: 'D maj',  type: 'major' },
-  { musical: 'A',   camelot: '11B', rkbx: 'A maj',  type: 'major' },
-  { musical: 'E',   camelot: '12B', rkbx: 'E maj',  type: 'major' },
-  { musical: 'B',   camelot: '1B',  rkbx: 'B maj',  type: 'major' },
-  { musical: 'F#',  camelot: '2B',  rkbx: 'F# maj', type: 'major' },
-  { musical: 'Db',  camelot: '3B',  rkbx: 'Db maj', type: 'major' },
-  { musical: 'Ab',  camelot: '4B',  rkbx: 'Ab maj', type: 'major' },
-  { musical: 'Eb',  camelot: '5B',  rkbx: 'Eb maj', type: 'major' },
-  { musical: 'Bb',  camelot: '6B',  rkbx: 'Bb maj', type: 'major' },
-  { musical: 'F',   camelot: '7B',  rkbx: 'F maj',  type: 'major' },
-  // Minors
-  { musical: 'Am',  camelot: '8A',  rkbx: 'A min',  type: 'minor' },
-  { musical: 'Em',  camelot: '9A',  rkbx: 'E min',  type: 'minor' },
-  { musical: 'Bm',  camelot: '10A', rkbx: 'B min',  type: 'minor' },
-  { musical: 'F#m', camelot: '11A', rkbx: 'F# min', type: 'minor' },
-  { musical: 'C#m', camelot: '12A', rkbx: 'C# min', type: 'minor' },
-  { musical: 'G#m', camelot: '1A',  rkbx: 'G# min', type: 'minor' },
-  { musical: 'Ebm', camelot: '2A',  rkbx: 'Eb min', type: 'minor' },
-  { musical: 'Bbm', camelot: '3A',  rkbx: 'Bb min', type: 'minor' },
-  { musical: 'Fm',  camelot: '4A',  rkbx: 'F min',  type: 'minor' },
-  { musical: 'Cm',  camelot: '5A',  rkbx: 'C min',  type: 'minor' },
-  { musical: 'Gm',  camelot: '6A',  rkbx: 'G min',  type: 'minor' },
-  { musical: 'Dm',  camelot: '7A',  rkbx: 'D min',  type: 'minor' },
+const BANDS3 = [
+  { name: 'LOW', fmin: 20, fmax: 300, color: '#ff3060', freq: '20-300Hz' },
+  { name: 'MID', fmin: 300, fmax: 4000, color: '#C6FF00', freq: '0.3-4kHz' },
+  { name: 'HIGH', fmin: 4000, fmax: 22000, color: '#30aaff', freq: '4-22kHz' }
 ];
+const BANDS4 = [
+  { name: 'LOW', fmin: 20, fmax: 220, color: '#ff3060', freq: '20-220Hz' },
+  { name: 'LO-M', fmin: 220, fmax: 1400, color: '#ff9030', freq: '0.22-1.4k' },
+  { name: 'HI-M', fmin: 1400, fmax: 7000, color: '#C6FF00', freq: '1.4-7k' },
+  { name: 'HIGH', fmin: 7000, fmax: 22000, color: '#30aaff', freq: '7-22k' }
+];
+S.bands = BANDS3;
 
-function getKeyByCamelot(camelot) {
-  return KEYS.find(k => k.camelot === camelot);
-}
+const $ = id => document.getElementById(id);
 
-function getCamelotNumber(camelot) {
-  return parseInt(camelot);
-}
-
-function getCamelotLetter(camelot) {
-  return camelot.slice(-1);
-}
-
-function findCompatible(key) {
-  if (!key) return null;
-  const num = getCamelotNumber(key.camelot);
-  const letter = getCamelotLetter(key.camelot);
-  
-  // Wrap function for wheel positions (1-12)
-  const wrap = (n) => ((n - 1 + 12) % 12) + 1;
-  const otherLetter = letter === 'A' ? 'B' : 'A';
-  
-  return {
-    perfect: [
-      { ...getKeyByCamelot(key.camelot), reason: 'Same key' }
-    ],
-    energy: [
-      { ...getKeyByCamelot(wrap(num + 1) + letter), reason: '+1 energy boost' },
-      { ...getKeyByCamelot(wrap(num - 1) + letter), reason: '-1 energy drop' },
-    ],
-    mood: [
-      // Relative major/minor (same number, different letter)
-      { ...getKeyByCamelot(num + otherLetter), reason: 'Mood change (rel.)' },
-    ],
-    bold: [
-      // Up/down 2, energy jumps
-      { ...getKeyByCamelot(wrap(num + 2) + letter), reason: '+2 big boost' },
-      // Major <-> Minor jumps
-      { ...getKeyByCamelot(wrap(num + 7) + otherLetter), reason: 'Dom/sub jump' },
-    ],
-    risky: [
-      { ...getKeyByCamelot(wrap(num + 3) + letter), reason: '+3 (use with care)' },
-      { ...getKeyByCamelot(wrap(num - 3) + letter), reason: '-3 (use with care)' },
-    ]
-  };
-}
-
-function buildKeyGrid() {
-  const grid = $('keyGrid');
-  grid.innerHTML = '';
-  
-  // Build 12 rows × 2 columns (major | minor), grouped by Camelot number
-  // Order: 1A 1B  2A 2B  ...  12A 12B
-  for (let n = 1; n <= 12; n++) {
-    for (const letter of ['A', 'B']) {
-      const camelot = n + letter;
-      const key = getKeyByCamelot(camelot);
-      if (!key) continue;
-      
-      const cell = document.createElement('button');
-      cell.className = 'key-cell ' + (key.type === 'minor' ? 'minor' : 'major');
-      cell.dataset.camelot = camelot;
-      cell.textContent = getKeyLabel(key);
-      
-      cell.addEventListener('click', () => {
-        state.selectedKey = key;
-        document.querySelectorAll('.key-cell').forEach(c => c.classList.remove('selected'));
-        cell.classList.add('selected');
-        renderCompatibility();
-        persistState();
-      });
-      
-      grid.appendChild(cell);
+// ==================== MAIN LOOP ====================
+let lastHist = 0, frameN = 0;
+function mainLoop(now) {
+  if (!A.running) return;
+  A.analyser.getFloatFrequencyData(A.freqData);
+  A.analyser.getFloatTimeDomainData(A.timeData);
+  A.analyserL.getFloatTimeDomainData(A.tL);
+  A.analyserR.getFloatTimeDomainData(A.tR);
+  const rms = calcRMS(A.timeData), peak = calcPeak(A.timeData);
+  const lufs = calcLUFS(A.timeData), crest = (isFinite(peak) && isFinite(rms)) ? peak - rms : 0;
+  const rmsL = calcRMS(A.tL), rmsR = calcRMS(A.tR);
+  const sm = parseFloat($('slSmooth').value) / 100;
+  for (let i = 0; i < A.freqData.length; i++) {
+    A.smoothed[i] = !isFinite(A.smoothed[i]) ? A.freqData[i] : A.smoothed[i] * sm + A.freqData[i] * (1 - sm);
+  }
+  if (now - lastHist > 100) {
+    lastHist = now;
+    if (rms > -60) {
+      S.history.push({ time: now, spectrum: new Float32Array(A.freqData), lufs, peak, rms, crest });
+      const cut = now - S.winMin * 60000;
+      S.history = S.history.filter(f => f.time >= cut);
     }
   }
-  
-  // Re-select if already chosen
-  if (state.selectedKey) {
-    const cell = grid.querySelector(`[data-camelot="${state.selectedKey.camelot}"]`);
-    if (cell) cell.classList.add('selected');
-  }
+  if (S.autoLock) detectTrackChange(now, rms);
+  processBpm(now);
+  if (S.splLogging) processSpl(rms);
+  if (S.phaseMeasuring) processPhase();
+  const tab = document.querySelector('.tab.active')?.dataset.tab;
+  if (tab === 'analyzer') { updateMetrics(lufs, peak, rms, crest, rmsL, rmsR); updateBands(); drawSpectrum(); }
+  if (tab === 'bpm' && S.bpmDetecting) updateBpmDisplay();
+  if (tab === 'spl') drawSplChart();
+  if (tab === 'club') { drawPhaseChart(); }
+  if (frameN++ % 60 === 0) saveState();
+  requestAnimationFrame(mainLoop);
 }
 
-function getKeyLabel(key) {
-  switch (state.notation) {
-    case 'camelot': return key.camelot;
-    case 'musical': return key.musical;
-    case 'rkbx':    return key.rkbx;
-  }
+// ==================== AUDIO MATH ====================
+function calcRMS(d) { let s = 0; for (let i = 0; i < d.length; i++) s += d[i] * d[i]; const r = Math.sqrt(s / d.length); return r > 0 ? 20 * Math.log10(r) : -Infinity; }
+function calcPeak(d) { let p = 0; for (let i = 0; i < d.length; i++) { const a = Math.abs(d[i]); if (a > p) p = a; } return p > 0 ? 20 * Math.log10(p) : -Infinity; }
+function calcLUFS(d) { let s = 0; for (let i = 0; i < d.length; i++) s += d[i] * d[i]; const m = s / d.length; return m <= 0 ? -Infinity : 10 * Math.log10(m) - 0.691; }
+function fIdx(freq) { if (!A.ctx) return 0; return Math.round(freq / (A.ctx.sampleRate / 2) * A.analyser.frequencyBinCount); }
+function bandLevel(spec, fmin, fmax) {
+  const i1 = fIdx(fmin), i2 = Math.min(fIdx(fmax), spec.length - 1);
+  let s = 0, c = 0;
+  for (let i = i1; i <= i2; i++) { if (isFinite(spec[i])) { s += Math.pow(10, spec[i] / 10); c++; } }
+  return c ? 10 * Math.log10(s / c) : -Infinity;
 }
+function allBandLevels(spec) { return S.bands.map(b => bandLevel(spec, b.fmin, b.fmax)); }
 
-function renderCompatibility() {
-  const display = $('compatDisplay');
-  
-  if (!state.selectedKey) {
-    display.innerHTML = '<div style="text-align:center; color: var(--text-mute); padding: 40px; font-size: 11px;">Seleccioná una tonalidad</div>';
-    return;
-  }
-  
-  const compat = findCompatible(state.selectedKey);
-  if (!compat) return;
-  
-  let html = `
-    <div class="current-key-display">
-      <div class="current-key-camelot">${state.selectedKey.camelot}</div>
-      <div class="current-key-musical">${state.selectedKey.musical} · ${state.selectedKey.rkbx}</div>
-      <div class="current-key-label">${state.selectedKey.type === 'major' ? 'Major' : 'Minor'} · Selected Key</div>
-    </div>
-  `;
-  
-  html += buildCompatSection('Perfect Match', 'perfect', compat.perfect, '');
-  html += buildCompatSection('Energy Shift', 'warm', compat.energy, 'warm');
-  html += buildCompatSection('Mood Change', 'mood', compat.mood, '');
-  html += buildCompatSection('Bold Transitions', 'bold', compat.bold, 'bold');
-  html += buildCompatSection('Risky / Advanced', 'risky', compat.risky, 'risk');
-  
-  display.innerHTML = html;
-  
-  // Add click handlers to compat items
-  display.querySelectorAll('.compat-item[data-camelot]').forEach(item => {
-    item.addEventListener('click', () => {
-      const camelot = item.dataset.camelot;
-      const key = getKeyByCamelot(camelot);
-      if (key) {
-        state.selectedKey = key;
-        document.querySelectorAll('.key-cell').forEach(c => c.classList.remove('selected'));
-        const cell = document.querySelector(`.key-cell[data-camelot="${camelot}"]`);
-        if (cell) cell.classList.add('selected');
-        renderCompatibility();
-        persistState();
-      }
-    });
-  });
-}
-
-function buildCompatSection(title, key, items, modifier) {
-  const validItems = items.filter(i => i && i.camelot);
-  if (validItems.length === 0) return '';
-  
-  return `
-    <div class="compat-section">
-      <div class="compat-section-title ${modifier}">${title}</div>
-      <div class="compat-list">
-        ${validItems.map(item => `
-          <div class="compat-item" data-camelot="${item.camelot}">
-            <div class="compat-item-camelot">${item.camelot}</div>
-            <div class="compat-item-musical">${item.musical} · ${item.rkbx}</div>
-            <div class="compat-item-desc">${item.reason}</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
-}
-
-// Notation toggle
-document.querySelectorAll('.notation-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.notation-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    state.notation = btn.dataset.notation;
-    // Update key labels in grid
-    document.querySelectorAll('.key-cell').forEach(cell => {
-      const key = getKeyByCamelot(cell.dataset.camelot);
-      if (key) cell.textContent = getKeyLabel(key);
-    });
-    persistState();
-  });
-});
-
-// ============ MAIN LOOP ============
-let lastFrameTime = 0;
-let frameCounter = 0;
-
-function loop(now) {
-  if (!state.running) return;
-  
-  if (state.audioCtx) {
-    state.analyser.getFloatFrequencyData(state.freqData);
-    state.analyser.getFloatTimeDomainData(state.timeData);
-    state.analyserL.getFloatTimeDomainData(state.timeDataL);
-    state.analyserR.getFloatTimeDomainData(state.timeDataR);
-    
-    const rms = computeRMS(state.timeData);
-    const peak = computePeak(state.timeData);
-    const lufs = computeKWeightedLoudness(state.timeData);
-    const crest = (isFinite(peak) && isFinite(rms)) ? peak - rms : 0;
-    const rmsL = computeRMS(state.timeDataL);
-    const rmsR = computeRMS(state.timeDataR);
-    
-    const smoothFactor = parseFloat($('smoothSlider').value) / 100;
-    for (let i = 0; i < state.freqData.length; i++) {
-      if (!isFinite(state.smoothedSpectrum[i])) {
-        state.smoothedSpectrum[i] = state.freqData[i];
-      } else {
-        state.smoothedSpectrum[i] = state.smoothedSpectrum[i] * smoothFactor + 
-                                     state.freqData[i] * (1 - smoothFactor);
-      }
-    }
-    
-    if (now - lastFrameTime > 100) {
-      lastFrameTime = now;
-      frameCounter++;
-      
-      if (rms > -60) {
-        state.historyFrames.push({
-          time: now,
-          spectrum: new Float32Array(state.freqData),
-          lufs, peak, rms, crest
-        });
-        const windowMs = state.windowMinutes * 60 * 1000;
-        const cutoff = now - windowMs;
-        state.historyFrames = state.historyFrames.filter(f => f.time >= cutoff);
-      }
-    }
-    
-    if (state.autoLock) detectTrackChange(now, rms);
-    
-    // BPM processing
-    processBpmFrame(now);
-    
-    updateMetrics(lufs, peak, rms, crest, rmsL, rmsR);
-    updateBands();
-    drawSpectrum();
-    
-    if (state.bpmDetecting) updateBpmDisplay();
-    
-    // Club tab processing
-    processClubFrame(rms);
-    
-    if (frameCounter % 30 === 0) persistState();
-  }
-  
-  requestAnimationFrame(loop);
-}
-
-function detectTrackChange(now, rms) {
-  if (rms < CONFIG.trackChangeThreshold) {
-    if (!state.lowLevelStart) state.lowLevelStart = now;
-    else if (now - state.lowLevelStart > CONFIG.trackChangeDuration) {
-      if (state.historyFrames.length > 30 && now - state.lastLockTime > 30000) {
-        lockTarget(true);
-        state.lastLockTime = now;
-        // Reset BPM peaks on track change
-        state.bpmPeaks = [];
-      }
-      state.lowLevelStart = null;
-    }
-  } else {
-    state.lowLevelStart = null;
-  }
-}
-
-// ============ TARGET ============
-function lockTarget(isAuto = false) {
-  if (state.historyFrames.length < 10) {
-    if (!isAuto) alert('Necesitás ~1s de audio para lockear target.');
-    return;
-  }
-  
-  const numFrames = state.historyFrames.length;
-  const specLen = state.historyFrames[0].spectrum.length;
-  const avgSpec = new Float32Array(specLen);
-  
-  let sumLufs = 0, sumPeak = 0, sumRms = 0, sumCrest = 0;
-  let cLufs = 0, cPeak = 0, cRms = 0, cCrest = 0;
-  
-  for (let i = 0; i < specLen; i++) {
-    let sumLin = 0, count = 0;
-    for (let f = 0; f < numFrames; f++) {
-      const v = state.historyFrames[f].spectrum[i];
-      if (isFinite(v)) {
-        sumLin += Math.pow(10, v / 10);
-        count++;
-      }
-    }
-    avgSpec[i] = count > 0 ? 10 * Math.log10(sumLin / count) : -Infinity;
-  }
-  
-  for (const f of state.historyFrames) {
-    if (isFinite(f.lufs)) { sumLufs += f.lufs; cLufs++; }
-    if (isFinite(f.peak)) { sumPeak += f.peak; cPeak++; }
-    if (isFinite(f.rms)) { sumRms += f.rms; cRms++; }
-    if (isFinite(f.crest)) { sumCrest += f.crest; cCrest++; }
-  }
-  
-  state.target = {
-    spectrum: avgSpec,
-    bandLevels: getAllBandLevels(avgSpec),
-    lufs: cLufs ? sumLufs / cLufs : -Infinity,
-    peak: cPeak ? sumPeak / cPeak : -Infinity,
-    rms: cRms ? sumRms / cRms : -Infinity,
-    crest: cCrest ? sumCrest / cCrest : 0,
-    timestamp: Date.now(),
-    isAuto
-  };
-  
-  persistState();
-  
-  const btn = $('lockBtn');
-  const orig = btn.textContent;
-  btn.textContent = isAuto ? '⌖ AUTO ✓' : '⌖ LOCKED ✓';
-  setTimeout(() => { btn.textContent = orig; }, 1200);
-}
-
-function clearTarget() {
-  state.target = null;
-  state.historyFrames = [];
-  persistState();
-}
-
-// ============ UI UPDATE ============
+// ==================== ANALYZER UI ====================
 function updateMetrics(lufs, peak, rms, crest, rmsL, rmsR) {
   const fmt = (v, d = 1) => isFinite(v) ? v.toFixed(d) : '—';
-  
-  $('lufsValue').textContent = fmt(lufs);
-  $('peakValue').textContent = fmt(peak);
-  $('rmsValue').textContent = fmt(rms);
-  $('crestValue').textContent = fmt(crest);
-  
-  $('peakValue').className = 'metric-value' + (peak > -1 ? ' over' : peak > -6 ? ' warn' : '');
-  $('lufsValue').className = 'metric-value' + (lufs > -6 ? ' over' : lufs > -10 ? ' warn' : '');
-  
-  if (state.target) {
-    $('lufsTarget').textContent = 'tgt ' + fmt(state.target.lufs);
-    $('peakTarget').textContent = 'tgt ' + fmt(state.target.peak);
-    $('rmsTarget').textContent = 'tgt ' + fmt(state.target.rms);
-    $('crestTarget').textContent = 'tgt ' + fmt(state.target.crest);
-  } else {
-    $('lufsTarget').textContent = 'tgt —';
-    $('peakTarget').textContent = 'tgt —';
-    $('rmsTarget').textContent = 'tgt —';
-    $('crestTarget').textContent = 'tgt —';
+  $('azLufs').textContent = fmt(lufs); $('azLufs').className = 'az-val' + (lufs > -6 ? ' over' : lufs > -10 ? ' warn' : '');
+  $('azPeak').textContent = fmt(peak); $('azPeak').className = 'az-val' + (peak > -1 ? ' over' : peak > -6 ? ' warn' : '');
+  $('azRms').textContent = fmt(rms);
+  $('azCrest').textContent = fmt(crest);
+  if (S.target) {
+    $('azLufsTgt').textContent = 'tgt ' + fmt(S.target.lufs);
+    $('azPeakTgt').textContent = 'tgt ' + fmt(S.target.peak);
+    $('azRmsTgt').textContent = 'tgt ' + fmt(S.target.rms);
+    $('azCrestTgt').textContent = 'tgt ' + fmt(S.target.crest);
   }
-  
-  const lPct = isFinite(rmsL) ? Math.max(0, Math.min(100, (rmsL + 60) / 60 * 100)) : 0;
-  const rPct = isFinite(rmsR) ? Math.max(0, Math.min(100, (rmsR + 60) / 60 * 100)) : 0;
-  $('leftBar').style.width = lPct + '%';
-  $('rightBar').style.width = rPct + '%';
+  const lp = isFinite(rmsL) ? Math.max(0, Math.min(100, (rmsL + 60) / 60 * 100)) : 0;
+  const rp = isFinite(rmsR) ? Math.max(0, Math.min(100, (rmsR + 60) / 60 * 100)) : 0;
+  $('lBar').style.width = lp + '%'; $('rBar').style.width = rp + '%';
 }
 
 function updateBands() {
-  const bandLevels = getAllBandLevels(state.smoothedSpectrum);
-  
-  state.bands.forEach((band, i) => {
-    const current = bandLevels[i];
-    const target = state.target ? state.target.bandLevels[i] : null;
-    const dbMin = -60, dbMax = 0;
-    const pct = isFinite(current) ? Math.max(0, Math.min(100, (current - dbMin) / (dbMax - dbMin) * 100)) : 0;
-    
-    const fillEl = $(`band-fill-${i}`);
-    const valueEl = $(`band-value-${i}`);
-    const deltaEl = $(`band-delta-${i}`);
-    const targetLine = $(`band-target-${i}`);
-    
-    if (fillEl) {
-      fillEl.style.width = pct + '%';
-      fillEl.style.background = band.color;
+  const lvls = allBandLevels(A.smoothed);
+  S.bands.forEach((band, i) => {
+    const cur = lvls[i], tgt = S.target ? S.target.bandLevels[i] : null;
+    const pct = isFinite(cur) ? Math.max(0, Math.min(100, (cur + 60) / 60 * 100)) : 0;
+    const fill = $('bf' + i), val = $('bv' + i), delta = $('bd' + i), tline = $('bt' + i);
+    if (fill) { fill.style.width = pct + '%'; fill.style.background = band.color; }
+    if (val) val.textContent = isFinite(cur) ? cur.toFixed(1) + ' dB' : '—';
+    if (delta && tgt !== null && isFinite(tgt) && isFinite(cur)) {
+      const d = cur - tgt;
+      delta.textContent = (d >= 0 ? '+' : '') + d.toFixed(1);
+      delta.className = 'bd-delta' + (Math.abs(d) < 1 ? ' match' : d > 0 ? ' over' : ' under');
     }
-    if (valueEl) valueEl.textContent = isFinite(current) ? current.toFixed(1) + ' dB' : '— dB';
-    
-    if (deltaEl && target !== null && isFinite(target) && isFinite(current)) {
-      const delta = current - target;
-      deltaEl.textContent = (delta >= 0 ? '+' : '') + delta.toFixed(1);
-      const abs = Math.abs(delta);
-      deltaEl.className = 'band-delta' + (abs < 1 ? ' match' : delta > 0 ? ' over' : ' under');
-    } else if (deltaEl) {
-      deltaEl.textContent = '—';
-      deltaEl.className = 'band-delta';
-    }
-    
-    if (targetLine && target !== null && isFinite(target)) {
-      const tgtPct = Math.max(0, Math.min(100, (target - dbMin) / (dbMax - dbMin) * 100));
-      targetLine.style.left = tgtPct + '%';
-      targetLine.classList.add('active');
-    } else if (targetLine) {
-      targetLine.classList.remove('active');
-    }
+    if (tline && tgt !== null && isFinite(tgt)) {
+      const tp = Math.max(0, Math.min(100, (tgt + 60) / 60 * 100));
+      tline.style.left = tp + '%'; tline.classList.add('on');
+    } else if (tline) tline.classList.remove('on');
   });
-}
-
-function drawSpectrum() {
-  const canvas = $('spectrum');
-  const ctx = canvas.getContext('2d');
-  const w = canvas.width = canvas.clientWidth * devicePixelRatio;
-  const h = canvas.height = canvas.clientHeight * devicePixelRatio;
-  
-  ctx.clearRect(0, 0, w, h);
-  
-  const fMin = 20, fMax = 22000;
-  const logMin = Math.log10(fMin);
-  const logMax = Math.log10(fMax);
-  
-  ctx.strokeStyle = '#1a1a1a';
-  ctx.lineWidth = 1 * devicePixelRatio;
-  ctx.fillStyle = '#444';
-  ctx.font = `${10 * devicePixelRatio}px "JetBrains Mono", monospace`;
-  
-  const freqMarks = [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000];
-  freqMarks.forEach(f => {
-    const x = (Math.log10(f) - logMin) / (logMax - logMin) * w;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, h);
-    ctx.stroke();
-    const label = f >= 1000 ? (f/1000) + 'k' : f + '';
-    ctx.fillText(label, x + 3 * devicePixelRatio, h - 4 * devicePixelRatio);
-  });
-  
-  const dbMin = CONFIG.minDb, dbMax = CONFIG.maxDb;
-  for (let db = dbMax; db >= dbMin; db -= 10) {
-    const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(w, y);
-    ctx.stroke();
-    ctx.fillText(db + ' dB', 4 * devicePixelRatio, y - 2 * devicePixelRatio);
-  }
-  
-  state.bands.forEach(band => {
-    const x1 = (Math.log10(Math.max(band.fmin, fMin)) - logMin) / (logMax - logMin) * w;
-    const x2 = (Math.log10(Math.min(band.fmax, fMax)) - logMin) / (logMax - logMin) * w;
-    ctx.fillStyle = band.color + '0d';
-    ctx.fillRect(x1, 0, x2 - x1, h);
-  });
-  
-  // Target ghost line
-  if (state.target) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-    ctx.lineWidth = 2 * devicePixelRatio;
-    ctx.setLineDash([6 * devicePixelRatio, 4 * devicePixelRatio]);
-    ctx.beginPath();
-    let started = false;
-    for (let i = 0; i < state.target.spectrum.length; i++) {
-      const freq = i / state.target.spectrum.length * (state.audioCtx.sampleRate / 2);
-      if (freq < fMin || freq > fMax) continue;
-      const db = state.target.spectrum[i];
-      if (!isFinite(db)) continue;
-      const x = (Math.log10(freq) - logMin) / (logMax - logMin) * w;
-      const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
-      if (!started) { ctx.moveTo(x, y); started = true; }
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-    ctx.setLineDash([]);
-  }
-  
-  // Current spectrum by band
-  for (let bandIdx = 0; bandIdx < state.bands.length; bandIdx++) {
-    const band = state.bands[bandIdx];
-    ctx.strokeStyle = band.color;
-    ctx.fillStyle = band.color + '33';
-    ctx.lineWidth = 1.5 * devicePixelRatio;
-    
-    ctx.beginPath();
-    let started = false;
-    let lastX = 0;
-    
-    for (let i = 0; i < state.smoothedSpectrum.length; i++) {
-      const freq = i / state.smoothedSpectrum.length * (state.audioCtx.sampleRate / 2);
-      if (freq < band.fmin || freq > band.fmax) continue;
-      if (freq < fMin || freq > fMax) continue;
-      const db = state.smoothedSpectrum[i];
-      if (!isFinite(db)) continue;
-      const x = (Math.log10(freq) - logMin) / (logMax - logMin) * w;
-      const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
-      if (!started) { ctx.moveTo(x, h); ctx.lineTo(x, y); started = true; }
-      else ctx.lineTo(x, y);
-      lastX = x;
-    }
-    if (started) {
-      ctx.lineTo(lastX, h);
-      ctx.closePath();
-      ctx.fill();
-      
-      ctx.beginPath();
-      let s = false;
-      for (let i = 0; i < state.smoothedSpectrum.length; i++) {
-        const freq = i / state.smoothedSpectrum.length * (state.audioCtx.sampleRate / 2);
-        if (freq < band.fmin || freq > band.fmax) continue;
-        if (freq < fMin || freq > fMax) continue;
-        const db = state.smoothedSpectrum[i];
-        if (!isFinite(db)) continue;
-        const x = (Math.log10(freq) - logMin) / (logMax - logMin) * w;
-        const y = (1 - (db - dbMin) / (dbMax - dbMin)) * h;
-        if (!s) { ctx.moveTo(x, y); s = true; }
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    }
-  }
 }
 
 function buildBands() {
   const row = $('bandsRow');
   row.innerHTML = '';
-  row.className = 'bands-row ' + (state.bandMode === 3 ? 'three' : 'four');
-  
-  state.bands.forEach((band, i) => {
-    const div = document.createElement('div');
-    div.className = 'band';
-    div.innerHTML = `
-      <div class="band-header">
-        <span class="band-name" style="color:${band.color}">${band.name}</span>
-        <span class="band-freq">${band.freq}</span>
-      </div>
-      <div class="band-meter">
-        <div class="band-fill" id="band-fill-${i}"></div>
-        <div class="band-target-line" id="band-target-${i}"></div>
-      </div>
-      <div class="band-values">
-        <span class="band-current" id="band-value-${i}">— dB</span>
-        <span class="band-delta" id="band-delta-${i}">—</span>
-      </div>
-    `;
-    row.appendChild(div);
+  row.className = 'az-bands ' + (S.bandMode === 3 ? 'b3' : 'b4');
+  S.bands.forEach((b, i) => {
+    const d = document.createElement('div');
+    d.className = 'band';
+    d.innerHTML = `<div class="band-hdr"><span style="color:${b.color};font-weight:700;">${b.name}</span><span style="color:var(--mute);font-size:8px;">${b.freq}</span></div>
+    <div class="band-bar"><div class="band-fill" id="bf${i}"></div><div class="band-tgt" id="bt${i}"></div></div>
+    <div class="band-vals"><span class="bd-cur" id="bv${i}">— dB</span><span class="bd-delta" id="bd${i}">—</span></div>`;
+    row.appendChild(d);
   });
 }
 
-// ============ PERSISTENCE ============
-function persistState() {
-  try {
-    const data = {
-      bandMode: state.bandMode,
-      windowMinutes: state.windowMinutes,
-      autoLock: state.autoLock,
-      smooth: $('smoothSlider').value,
-      gain: $('gainSlider').value,
-      notation: state.notation,
-      selectedKey: state.selectedKey ? state.selectedKey.camelot : null,
-      target: state.target ? {
-        spectrum: Array.from(state.target.spectrum),
-        bandLevels: state.target.bandLevels,
-        lufs: state.target.lufs,
-        peak: state.target.peak,
-        rms: state.target.rms,
-        crest: state.target.crest,
-        timestamp: state.target.timestamp,
-        isAuto: state.target.isAuto
-      } : null
-    };
-    localStorage.setItem('dj-tool-state', JSON.stringify(data));
-  } catch (e) {}
-}
-
-function loadPersistedState() {
-  try {
-    const raw = localStorage.getItem('dj-tool-state');
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    
-    if (data.bandMode) {
-      state.bandMode = data.bandMode;
-      state.bands = data.bandMode === 3 ? CONFIG.bands3 : CONFIG.bands4;
-      $('modeBtn').textContent = data.bandMode + '-Band';
-      buildBands();
-    }
-    if (data.windowMinutes) {
-      state.windowMinutes = data.windowMinutes;
-      $('windowSlider').value = data.windowMinutes;
-      $('windowValue').textContent = data.windowMinutes + 'min';
-    }
-    if (data.autoLock !== undefined) {
-      state.autoLock = data.autoLock;
-      $('autoLockBtn').textContent = 'Auto: ' + (data.autoLock ? 'ON' : 'OFF');
-      $('autoLockBtn').classList.toggle('active', data.autoLock);
-    }
-    if (data.smooth) {
-      $('smoothSlider').value = data.smooth;
-      $('smoothValue').textContent = (data.smooth / 100).toFixed(2);
-    }
-    if (data.gain) {
-      $('gainSlider').value = data.gain;
-      $('gainValue').textContent = data.gain + 'dB';
-      state.gainDb = parseFloat(data.gain);
-      if (state.gainNode) state.gainNode.gain.value = Math.pow(10, state.gainDb / 20);
-    }
-    if (data.notation) {
-      state.notation = data.notation;
-      document.querySelectorAll('.notation-btn').forEach(b => {
-        b.classList.toggle('active', b.dataset.notation === state.notation);
-      });
-      document.querySelectorAll('.key-cell').forEach(cell => {
-        const key = getKeyByCamelot(cell.dataset.camelot);
-        if (key) cell.textContent = getKeyLabel(key);
-      });
-    }
-    if (data.selectedKey) {
-      state.selectedKey = getKeyByCamelot(data.selectedKey);
-      const cell = document.querySelector(`.key-cell[data-camelot="${data.selectedKey}"]`);
-      if (cell) cell.classList.add('selected');
-      renderCompatibility();
-    }
-    if (data.target) {
-      state.target = {
-        ...data.target,
-        spectrum: new Float32Array(data.target.spectrum)
-      };
-    }
-    loadFpState(data);
-  } catch (e) {}
-}
-
-// ============ WAKE LOCK ============
-let wakeLock = null;
-async function requestWakeLock() {
-  try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-    }
-  } catch (e) {}
-}
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && state.running) requestWakeLock();
-});
-
-// ============ EVENT HANDLERS ============
-$('startBtn').addEventListener('click', async () => {
-  const ok = await startAudio();
-  if (ok) {
-    $('startOverlay').style.display = 'none';
-    // Auto-start BPM detection
-    state.bpmDetecting = true;
-    $('autoBpmStart').textContent = '⏸ Stop Detect';
-    $('autoBpmStart').classList.add('active');
-  }
-});
-
-$('startNoAudioBtn').addEventListener('click', () => {
-  $('startOverlay').style.display = 'none';
-  startNoAudio();
-});
-
-$('lockBtn').addEventListener('click', () => lockTarget(false));
-$('clearBtn').addEventListener('click', clearTarget);
-
-$('modeBtn').addEventListener('click', () => {
-  state.bandMode = state.bandMode === 3 ? 4 : 3;
-  state.bands = state.bandMode === 3 ? CONFIG.bands3 : CONFIG.bands4;
-  $('modeBtn').textContent = state.bandMode + '-Band';
-  if (state.target) state.target.bandLevels = getAllBandLevels(state.target.spectrum);
-  buildBands();
-  persistState();
-});
-
-$('autoLockBtn').addEventListener('click', () => {
-  state.autoLock = !state.autoLock;
-  $('autoLockBtn').textContent = 'Auto: ' + (state.autoLock ? 'ON' : 'OFF');
-  $('autoLockBtn').classList.toggle('active', state.autoLock);
-  persistState();
-});
-
-$('windowSlider').addEventListener('input', (e) => {
-  state.windowMinutes = parseInt(e.target.value);
-  $('windowValue').textContent = state.windowMinutes + 'min';
-  persistState();
-});
-
-$('smoothSlider').addEventListener('input', (e) => {
-  $('smoothValue').textContent = (e.target.value / 100).toFixed(2);
-  persistState();
-});
-
-$('gainSlider').addEventListener('input', (e) => {
-  const db = parseFloat(e.target.value);
-  state.gainDb = db;
-  $('gainValue').textContent = db + 'dB';
-  if (state.gainNode) state.gainNode.gain.value = Math.pow(10, db / 20);
-  persistState();
-});
-
-// BPM
-$('autoBpmStart').addEventListener('click', () => {
-  if (!state.audioCtx) {
-    alert('Necesitás iniciar con audio para detección automática.');
-    return;
-  }
-  state.bpmDetecting = !state.bpmDetecting;
-  if (state.bpmDetecting) {
-    state.bpmPeaks = [];
-    state.bpmEnergyHistory = [];
-    $('autoBpmStart').textContent = '⏸ Stop Detect';
-    $('autoBpmStart').classList.add('active');
-  } else {
-    $('autoBpmStart').textContent = '▶ Start Detect';
-    $('autoBpmStart').classList.remove('active');
-  }
-});
-
-$('autoBpmHalf').addEventListener('click', () => {
-  if (state.bpmCurrentValue) {
-    state.bpmCurrentValue = state.bpmCurrentValue / 2;
-    updateBpmDisplay();
-  }
-});
-
-$('autoBpmDouble').addEventListener('click', () => {
-  if (state.bpmCurrentValue) {
-    state.bpmCurrentValue = state.bpmCurrentValue * 2;
-    updateBpmDisplay();
-  }
-});
-
-// Tap tempo - support touch and click
-const tapPad = $('tapPad');
-let lastTapTime = 0;
-tapPad.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  const now = performance.now();
-  if (now - lastTapTime < 50) return; // debounce
-  lastTapTime = now;
-  handleTap();
-});
-
-// Spacebar tap support on desktop
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space' && document.querySelector('.tab[data-tab="bpm"].active')) {
-    e.preventDefault();
-    handleTap();
-  }
-});
-
-$('tapReset').addEventListener('click', resetTap);
-
-$('tapUseAsBpm').addEventListener('click', () => {
-  if (state.tapTimes.length >= 4) {
-    const intervals = [];
-    for (let i = 1; i < state.tapTimes.length; i++) {
-      intervals.push(state.tapTimes[i] - state.tapTimes[i-1]);
-    }
-    const avg = intervals.reduce((a, b) => a + b, 0) / intervals.length;
-    const bpm = 60000 / avg;
-    state.bpmCurrentValue = bpm;
-    state.bpmConfidence = 100;
-    state.bpmAlternatives = [];
-    updateBpmDisplay();
-    $('autoBpmValue').textContent = bpm.toFixed(1);
-  } else {
-    alert('Tocá al menos 4 veces antes de usar como BPM principal.');
-  }
-});
-
-// Device selector
-$('deviceApplyBtn').addEventListener('click', () => {
-  const select = $('deviceSelect');
-  if (select.value) switchAudioDevice(select.value);
-});
-$('deviceSelect').addEventListener('change', (e) => {
-  if (e.target.value) switchAudioDevice(e.target.value);
-});
-
-// Listen for new devices plugged in (TRRS adapter)
-navigator.mediaDevices.addEventListener('devicechange', async () => {
-  if (state.audioCtx) await enumerateAudioDevices();
-});
-
-// ============ CLUB TAB ============
-
-// ---- FLOOR PLAN ----
-const FP = {
-  tool: 'move',
-  speakerType: 'K12.2',
-  speakers: [],
-  dragging: null,
-  dragOffX: 0,
-  dragOffY: 0,
-  nextId: 1,
-};
-
-const SPEAKER_COLORS = { 'K12.2': '#C6FF00', 'SUB': '#ff3060', 'MON': '#30aaff' };
-const SPEAKER_RADIUS = { 'K12.2': 14, 'SUB': 18, 'MON': 11 };
-
-// Colombo Planta Baja — traced from photo (normalized 0-1 coordinates)
-// Trapezoid main room + side areas
-const FLOOR_WALLS = [
-  // Main room (trapezoid)
-  [[0.04,0.08],[0.55,0.04],[0.55,0.85],[0.04,0.90]],
-  // Side corridor/chill
-  [[0.55,0.04],[0.82,0.04],[0.82,0.45],[0.55,0.45]],
-  // Bathrooms / back rooms
-  [[0.55,0.45],[0.82,0.45],[0.82,0.90],[0.55,0.90]],
-];
-
-const FLOOR_LABELS = [
-  { text: 'SALA PRINCIPAL', x: 0.28, y: 0.48 },
-  { text: 'ZONA CHILL', x: 0.68, y: 0.25 },
-  { text: 'BAÑOS / BACK', x: 0.68, y: 0.68 },
-  { text: 'BOOTH', x: 0.28, y: 0.12 },
-];
-
-function setFpTool(tool) {
-  FP.tool = tool;
-  ['fpToolMove','fpToolAdd','fpToolDel'].forEach(id => $(`${id}`)?.classList.remove('active'));
-  const map = { move: 'fpToolMove', add: 'fpToolAdd', del: 'fpToolDel' };
-  $(map[tool])?.classList.add('active');
-  $('floorCanvas').style.cursor = tool === 'add' ? 'crosshair' : tool === 'del' ? 'not-allowed' : 'grab';
-}
-
-function setSpeakerType(type) {
-  FP.speakerType = type;
-  ['spTypeK12','spTypeSub','spTypeMonitor'].forEach(id => $(id)?.classList.remove('active'));
-  const map = { 'K12.2': 'spTypeK12', 'SUB': 'spTypeSub', 'MON': 'spTypeMonitor' };
-  $(map[type])?.classList.add('active');
-}
-
-function resetSpeakers() {
-  if (confirm('¿Borrar todos los parlantes del plano?')) {
-    FP.speakers = [];
-    FP.nextId = 1;
-    drawFloorPlan();
-    saveFpState();
-  }
-}
-
-function drawFloorPlan() {
-  const canvas = $('floorCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
-  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
-  const dpr = devicePixelRatio;
-
+function drawSpectrum() {
+  const cv = $('specCanvas'), ctx = cv.getContext('2d');
+  const W = cv.width = cv.clientWidth * devicePixelRatio, H = cv.height = cv.clientHeight * devicePixelRatio, dpr = devicePixelRatio;
   ctx.clearRect(0, 0, W, H);
-
-  // Background grid
-  ctx.strokeStyle = '#1a1a1a';
-  ctx.lineWidth = 1;
-  const gs = 40 * dpr;
-  for (let x = 0; x < W; x += gs) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for (let y = 0; y < H; y += gs) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-
-  // Draw room walls
-  ctx.strokeStyle = '#444';
-  ctx.lineWidth = 2 * dpr;
-  ctx.fillStyle = 'rgba(30,30,30,0.6)';
-
-  FLOOR_WALLS.forEach(poly => {
-    ctx.beginPath();
-    poly.forEach(([x,y], i) => {
-      const px = x * W, py = y * H;
-      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-    });
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+  const fMin = 20, fMax = 22000, logMin = Math.log10(fMin), logMax = Math.log10(fMax);
+  const dbMin = S.zoomMin, dbMax = -10;
+  const fx = f => (Math.log10(Math.max(fMin, Math.min(fMax, f))) - logMin) / (logMax - logMin) * W;
+  const dy = db => (1 - (db - dbMin) / (dbMax - dbMin)) * H;
+  // Grid
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
+  [20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000].forEach(f => {
+    const x = fx(f); ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    ctx.fillStyle = '#444'; ctx.font = `${9 * dpr}px monospace`; ctx.textAlign = 'left';
+    ctx.fillText(f >= 1000 ? (f / 1000) + 'k' : f, x + 2, H - 3 * dpr);
   });
-
-  // Labels
-  ctx.fillStyle = '#555';
-  ctx.font = `${9 * dpr}px "JetBrains Mono", monospace`;
-  ctx.textAlign = 'center';
-  FLOOR_LABELS.forEach(({ text, x, y }) => {
-    ctx.fillText(text, x * W, y * H);
+  for (let db = dbMax; db >= dbMin; db -= 10) {
+    const y = dy(db); ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    ctx.fillStyle = '#444'; ctx.font = `${8 * dpr}px monospace`; ctx.textAlign = 'left';
+    ctx.fillText(db + 'dB', 2, y - 2);
+  }
+  // Band zones
+  S.bands.forEach(b => {
+    ctx.fillStyle = b.color + '0c';
+    ctx.fillRect(fx(b.fmin), 0, fx(b.fmax) - fx(b.fmin), H);
   });
-
-  // DSP labels
-  ctx.fillStyle = '#333';
-  ctx.font = `bold ${8 * dpr}px "JetBrains Mono", monospace`;
-  ctx.fillText('DSP 1 · MAIN FOG', 0.28 * W, 0.07 * H);
-  ctx.fillText('DSP 2 · STUDIO FOG', 0.68 * W, 0.08 * H);
-
-  // Draw speakers
-  FP.speakers.forEach(sp => {
-    const px = sp.x * W;
-    const py = sp.y * H;
-    const r = SPEAKER_RADIUS[sp.type] * dpr;
-    const col = SPEAKER_COLORS[sp.type];
-
-    // Glow
-    const grad = ctx.createRadialGradient(px, py, r * 0.3, px, py, r * 1.8);
-    grad.addColorStop(0, col + '40');
-    grad.addColorStop(1, 'transparent');
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(px, py, r * 1.8, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Body
-    ctx.fillStyle = col + '22';
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 2 * dpr;
-    ctx.beginPath();
-    ctx.arc(px, py, r, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-
-    // Direction indicator (top of circle)
-    ctx.strokeStyle = col;
-    ctx.lineWidth = 1.5 * dpr;
-    ctx.beginPath();
-    ctx.moveTo(px, py);
-    ctx.lineTo(px, py - r - 6 * dpr);
-    ctx.stroke();
-
-    // Label
-    ctx.fillStyle = col;
-    ctx.font = `bold ${8 * dpr}px "JetBrains Mono", monospace`;
-    ctx.textAlign = 'center';
-    ctx.fillText(`${sp.type} ${sp.id}`, px, py + r + 11 * dpr);
-  });
-}
-
-// Floor plan interaction
-function initFloorPlan() {
-  const canvas = $('floorCanvas');
-  if (!canvas) return;
-
-  const getPos = (e) => {
-    const rect = canvas.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    return {
-      x: (clientX - rect.left) / rect.width,
-      y: (clientY - rect.top) / rect.height,
-    };
-  };
-
-  const findSpeaker = (pos, threshold = 0.04) => {
-    return FP.speakers.find(sp =>
-      Math.hypot(sp.x - pos.x, sp.y - pos.y) < threshold
-    );
-  };
-
-  const onDown = (e) => {
-    e.preventDefault();
-    const pos = getPos(e);
-
-    if (FP.tool === 'add') {
-      const sp = { id: FP.nextId++, type: FP.speakerType, x: pos.x, y: pos.y };
-      FP.speakers.push(sp);
-      drawFloorPlan();
-      saveFpState();
-    } else if (FP.tool === 'del') {
-      const sp = findSpeaker(pos);
-      if (sp) {
-        FP.speakers = FP.speakers.filter(s => s.id !== sp.id);
-        drawFloorPlan();
-        saveFpState();
-      }
-    } else if (FP.tool === 'move') {
-      const sp = findSpeaker(pos);
-      if (sp) {
-        FP.dragging = sp;
-        FP.dragOffX = pos.x - sp.x;
-        FP.dragOffY = pos.y - sp.y;
-        canvas.style.cursor = 'grabbing';
-      }
+  // Target ghost
+  if (S.target) {
+    ctx.strokeStyle = 'rgba(255,255,255,0.5)'; ctx.lineWidth = 2 * dpr;
+    ctx.setLineDash([6 * dpr, 4 * dpr]);
+    ctx.beginPath(); let st = false;
+    for (let i = 0; i < S.target.spectrum.length; i++) {
+      const freq = i / S.target.spectrum.length * (A.ctx.sampleRate / 2);
+      if (freq < fMin || freq > fMax) continue;
+      const db = S.target.spectrum[i]; if (!isFinite(db)) continue;
+      const x = fx(freq), y = dy(db);
+      st ? ctx.lineTo(x, y) : (ctx.moveTo(x, y), st = true);
     }
-  };
-
-  const onMove = (e) => {
-    if (!FP.dragging) return;
-    e.preventDefault();
-    const pos = getPos(e);
-    FP.dragging.x = Math.max(0, Math.min(1, pos.x - FP.dragOffX));
-    FP.dragging.y = Math.max(0, Math.min(1, pos.y - FP.dragOffY));
-    drawFloorPlan();
-  };
-
-  const onUp = () => {
-    if (FP.dragging) {
-      FP.dragging = null;
-      canvas.style.cursor = 'grab';
-      saveFpState();
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+  // Spectrum per band
+  S.bands.forEach(b => {
+    ctx.strokeStyle = b.color; ctx.fillStyle = b.color + '33'; ctx.lineWidth = 1.5 * dpr;
+    const pts = [];
+    for (let i = 0; i < A.smoothed.length; i++) {
+      const freq = i / A.smoothed.length * (A.ctx.sampleRate / 2);
+      if (freq < b.fmin || freq > b.fmax || freq < fMin || freq > fMax) continue;
+      const db = A.smoothed[i]; if (!isFinite(db)) continue;
+      pts.push([fx(freq), dy(db)]);
     }
+    if (!pts.length) return;
+    ctx.beginPath(); ctx.moveTo(pts[0][0], H); ctx.lineTo(pts[0][0], pts[0][1]);
+    pts.forEach(([x, y]) => ctx.lineTo(x, y));
+    ctx.lineTo(pts[pts.length - 1][0], H); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); pts.forEach(([x, y]) => ctx.lineTo(x, y)); ctx.stroke();
+  });
+}
+
+// ==================== TARGET LOCK ====================
+function lockTarget(isAuto = false) {
+  if (S.history.length < 10) { if (!isAuto) alert('Necesitás ~1s de audio.'); return; }
+  const n = S.history.length, len = S.history[0].spectrum.length;
+  const avg = new Float32Array(len);
+  for (let i = 0; i < len; i++) {
+    let s = 0, c = 0;
+    for (let f = 0; f < n; f++) { const v = S.history[f].spectrum[i]; if (isFinite(v)) { s += Math.pow(10, v / 10); c++; } }
+    avg[i] = c ? 10 * Math.log10(s / c) : -Infinity;
+  }
+  let sl = 0, sp = 0, sr = 0, sc = 0, cl = 0, cp = 0, cr = 0, cc = 0;
+  for (const f of S.history) {
+    if (isFinite(f.lufs)) { sl += f.lufs; cl++; } if (isFinite(f.peak)) { sp += f.peak; cp++; }
+    if (isFinite(f.rms)) { sr += f.rms; cr++; } if (isFinite(f.crest)) { sc += f.crest; cc++; }
+  }
+  S.target = { spectrum: avg, bandLevels: allBandLevels(avg), lufs: cl ? sl/cl : -Infinity, peak: cp ? sp/cp : -Infinity, rms: cr ? sr/cr : -Infinity, crest: cc ? sc/cc : 0 };
+  const b = $('btnLock'); b.textContent = isAuto ? '⌖ AUTO ✓' : '⌖ LOCKED ✓';
+  setTimeout(() => { b.textContent = '⌖ Lock Target'; }, 1200);
+  saveState();
+}
+
+function detectTrackChange(now, rms) {
+  if (rms < -45) {
+    if (!S.lowStart) S.lowStart = now;
+    else if (now - S.lowStart > 1500 && S.history.length > 30 && now - S.lastLock > 30000) {
+      lockTarget(true); S.lastLock = now; S.bpmPeaks = []; S.lowStart = null;
+    }
+  } else S.lowStart = null;
+}
+
+// ==================== BPM ====================
+let bpmLastDraw = 0;
+function processBpm(now) {
+  if (!S.bpmDetecting || !A.bpmAnalyser) return;
+  A.bpmAnalyser.getFloatTimeDomainData(A.bpmData);
+  let s = 0; for (let i = 0; i < A.bpmData.length; i++) s += A.bpmData[i] * A.bpmData[i];
+  const energy = Math.sqrt(s / A.bpmData.length);
+  S.bpmEnergy.push({ time: now, energy });
+  while (S.bpmEnergy.length > 0 && now - S.bpmEnergy[0].time > 8000) S.bpmEnergy.shift();
+  if (S.bpmEnergy.length > 10) detectBpmPeaks(now);
+}
+
+function detectBpmPeaks(now) {
+  const h = S.bpmEnergy; if (h.length < 10) return;
+  const recent = h.slice(-20);
+  const avg = recent.reduce((s, e) => s + e.energy, 0) / recent.length;
+  const cur = h[h.length - 1], p1 = h[h.length - 2], p2 = h[h.length - 3];
+  if (!p2) return;
+  const isPeak = cur.energy > avg * 1.3 && cur.energy > p1.energy && p1.energy >= p2.energy;
+  if (isPeak) {
+    const last = S.bpmPeaks[S.bpmPeaks.length - 1];
+    if (!last || cur.time - last.time > 180) {
+      S.bpmPeaks.push({ time: cur.time });
+      if (S.bpmPeaks.length > 64) S.bpmPeaks.shift();
+      calcBpmFromPeaks();
+    }
+  }
+}
+
+function calcBpmFromPeaks() {
+  if (S.bpmPeaks.length < 8) return;
+  const iois = [];
+  for (let i = 1; i < S.bpmPeaks.length; i++) iois.push(S.bpmPeaks[i].time - S.bpmPeaks[i - 1].time);
+  const counts = new Map();
+  for (const ioi of iois) {
+    if (ioi < 200 || ioi > 1500) continue;
+    for (let bpm of [60000 / ioi, 60000 / (ioi * 2), 60000 / (ioi / 2)]) {
+      while (bpm < 60) bpm *= 2; while (bpm > 200) bpm /= 2;
+      if (bpm < 60 || bpm > 200) continue;
+      const r = Math.round(bpm * 2) / 2;
+      counts.set(r, (counts.get(r) || 0) + 1);
+    }
+  }
+  if (!counts.size) return;
+  const sorted = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  S.bpmVal = sorted[0][0];
+  S.bpmConf = Math.min(100, sorted[0][1] / [...counts.values()].reduce((a, b) => a + b, 0) * 250);
+  S.bpmAlts = sorted.slice(1, 4).map(([b]) => b);
+}
+
+function updateBpmDisplay() {
+  if (!S.bpmVal) return;
+  $('autoBpm').textContent = S.bpmVal.toFixed(1);
+  $('bpmCfill').style.width = S.bpmConf + '%';
+  $('bpmCpct').textContent = Math.round(S.bpmConf) + '%';
+  $('bpmAlts').innerHTML = S.bpmAlts.map(b => `<div class="bpm-alt"><span style="color:var(--text)">${b.toFixed(1)}</span></div>`).join('');
+  const q = 60000 / S.bpmVal;
+  $('uBar').textContent = (q * 4).toFixed(0) + 'ms'; $('u8Bar').textContent = ((q * 32) / 1000).toFixed(2) + 's';
+  $('uQ').textContent = q.toFixed(1) + 'ms'; $('uE').textContent = (q / 2).toFixed(1) + 'ms';
+  $('uD4').textContent = q.toFixed(0) + 'ms'; $('uD8').textContent = (q / 2).toFixed(0) + 'ms';
+  $('uHalf').textContent = (S.bpmVal / 2).toFixed(1) + ' BPM'; $('uDbl').textContent = (S.bpmVal * 2).toFixed(1) + ' BPM';
+}
+
+function toggleBpmDetect() {
+  S.bpmDetecting = !S.bpmDetecting;
+  if (S.bpmDetecting) { S.bpmPeaks = []; S.bpmEnergy = []; }
+  const btn = $('btnBpmStart');
+  btn.textContent = S.bpmDetecting ? '⏸ Stop' : '▶ Start';
+  btn.classList.toggle('on', S.bpmDetecting);
+}
+function bpmHalf() { if (S.bpmVal) { S.bpmVal /= 2; updateBpmDisplay(); } }
+function bpmDouble() { if (S.bpmVal) { S.bpmVal *= 2; updateBpmDisplay(); } }
+
+// Tap
+let tapLast = 0;
+function handleTap() {
+  const now = performance.now();
+  if (now - (S.tapTimes[S.tapTimes.length - 1] || 0) > 2000) S.tapTimes = [];
+  S.tapTimes.push(now); if (S.tapTimes.length > 16) S.tapTimes.shift();
+  const pad = $('tapPad'); pad.classList.add('hit'); setTimeout(() => pad.classList.remove('hit'), 80);
+  if (S.tapTimes.length >= 2) {
+    const iois = []; for (let i = 1; i < S.tapTimes.length; i++) iois.push(S.tapTimes[i] - S.tapTimes[i - 1]);
+    const avg = iois.reduce((a, b) => a + b, 0) / iois.length;
+    $('tapBpm').textContent = (60000 / avg).toFixed(1);
+    $('tapAvg').textContent = avg.toFixed(0);
+  }
+  $('tapCnt').textContent = S.tapTimes.length;
+}
+function tapReset() { S.tapTimes = []; $('tapBpm').textContent = '—'; $('tapAvg').textContent = '—'; $('tapCnt').textContent = '0'; }
+function tapUseBpm() {
+  if (S.tapTimes.length < 4) { alert('Tocá al menos 4 veces.'); return; }
+  const iois = []; for (let i = 1; i < S.tapTimes.length; i++) iois.push(S.tapTimes[i] - S.tapTimes[i - 1]);
+  S.bpmVal = 60000 / (iois.reduce((a, b) => a + b, 0) / iois.length);
+  S.bpmConf = 100; S.bpmAlts = []; updateBpmDisplay();
+  $('autoBpm').textContent = S.bpmVal.toFixed(1);
+}
+
+$('tapPad').addEventListener('pointerdown', e => { e.preventDefault(); if (performance.now() - tapLast > 50) { tapLast = performance.now(); handleTap(); } });
+document.addEventListener('keydown', e => { if (e.code === 'Space' && document.querySelector('.tab.active')?.dataset.tab === 'bpm') { e.preventDefault(); handleTap(); } });
+
+// ==================== HARMONIC ====================
+const KEYS = [
+  { m: 'C',   cam: '8B',  rkbx: 'C maj',  type: 'maj' }, { m: 'G',   cam: '9B',  rkbx: 'G maj',  type: 'maj' },
+  { m: 'D',   cam: '10B', rkbx: 'D maj',  type: 'maj' }, { m: 'A',   cam: '11B', rkbx: 'A maj',  type: 'maj' },
+  { m: 'E',   cam: '12B', rkbx: 'E maj',  type: 'maj' }, { m: 'B',   cam: '1B',  rkbx: 'B maj',  type: 'maj' },
+  { m: 'F#',  cam: '2B',  rkbx: 'F# maj', type: 'maj' }, { m: 'Db',  cam: '3B',  rkbx: 'Db maj', type: 'maj' },
+  { m: 'Ab',  cam: '4B',  rkbx: 'Ab maj', type: 'maj' }, { m: 'Eb',  cam: '5B',  rkbx: 'Eb maj', type: 'maj' },
+  { m: 'Bb',  cam: '6B',  rkbx: 'Bb maj', type: 'maj' }, { m: 'F',   cam: '7B',  rkbx: 'F maj',  type: 'maj' },
+  { m: 'Am',  cam: '8A',  rkbx: 'A min',  type: 'min' }, { m: 'Em',  cam: '9A',  rkbx: 'E min',  type: 'min' },
+  { m: 'Bm',  cam: '10A', rkbx: 'B min',  type: 'min' }, { m: 'F#m', cam: '11A', rkbx: 'F# min', type: 'min' },
+  { m: 'C#m', cam: '12A', rkbx: 'C# min', type: 'min' }, { m: 'G#m', cam: '1A',  rkbx: 'G# min', type: 'min' },
+  { m: 'Ebm', cam: '2A',  rkbx: 'Eb min', type: 'min' }, { m: 'Bbm', cam: '3A',  rkbx: 'Bb min', type: 'min' },
+  { m: 'Fm',  cam: '4A',  rkbx: 'F min',  type: 'min' }, { m: 'Cm',  cam: '5A',  rkbx: 'C min',  type: 'min' },
+  { m: 'Gm',  cam: '6A',  rkbx: 'G min',  type: 'min' }, { m: 'Dm',  cam: '7A',  rkbx: 'D min',  type: 'min' },
+];
+const byCam = cam => KEYS.find(k => k.cam === cam);
+function camNum(cam) { return parseInt(cam); }
+function camLet(cam) { return cam.slice(-1); }
+function wrap(n) { return ((n - 1 + 12) % 12) + 1; }
+
+function getCompatible(key) {
+  const n = camNum(key.cam), l = camLet(key.cam), other = l === 'A' ? 'B' : 'A';
+  return {
+    perfect: [{ ...key, reason: 'Same key' }],
+    energy: [byCam(wrap(n + 1) + l), byCam(wrap(n - 1) + l)].filter(Boolean).map(k => ({ ...k, reason: k.cam === wrap(n + 1) + l ? '+1 energy boost' : '-1 energy drop' })),
+    mood: [byCam(n + other)].filter(Boolean).map(k => ({ ...k, reason: 'Mood change (rel.)' })),
+    bold: [byCam(wrap(n + 2) + l), byCam(wrap(n + 7) + other)].filter(Boolean).map((k, i) => ({ ...k, reason: i === 0 ? '+2 big boost' : 'Dom/sub jump' })),
+    risky: [byCam(wrap(n + 3) + l), byCam(wrap(n - 3) + l)].filter(Boolean).map(k => ({ ...k, reason: '±3 use with care' })),
   };
-
-  canvas.addEventListener('mousedown', onDown);
-  canvas.addEventListener('mousemove', onMove);
-  canvas.addEventListener('mouseup', onUp);
-  canvas.addEventListener('touchstart', onDown, { passive: false });
-  canvas.addEventListener('touchmove', onMove, { passive: false });
-  canvas.addEventListener('touchend', onUp);
-
-  window.addEventListener('resize', drawFloorPlan);
-  drawFloorPlan();
 }
 
-function saveFpState() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('dj-tool-state') || '{}');
-    saved.fpSpeakers = FP.speakers;
-    saved.fpNextId = FP.nextId;
-    localStorage.setItem('dj-tool-state', JSON.stringify(saved));
-  } catch(e) {}
+function keyLabel(k) { return S.notation === 'camelot' ? k.cam : S.notation === 'musical' ? k.m : k.rkbx; }
+
+function buildKeyGrid() {
+  const grid = $('keyGrid'); grid.innerHTML = '';
+  for (let n = 1; n <= 12; n++) {
+    for (const l of ['A', 'B']) {
+      const key = byCam(n + l); if (!key) continue;
+      const c = document.createElement('button');
+      c.className = 'key-cell ' + (key.type === 'min' ? 'min' : 'maj');
+      c.dataset.cam = key.cam; c.textContent = keyLabel(key);
+      c.addEventListener('click', () => { S.selKey = key; updateKeyGrid(); renderCompat(); saveState(); });
+      grid.appendChild(c);
+    }
+  }
+  updateKeyGrid();
 }
 
-function loadFpState(data) {
-  if (data.fpSpeakers) { FP.speakers = data.fpSpeakers; FP.nextId = data.fpNextId || FP.speakers.length + 1; }
+function updateKeyGrid() {
+  document.querySelectorAll('.key-cell').forEach(c => {
+    const k = byCam(c.dataset.cam);
+    c.textContent = keyLabel(k);
+    c.classList.toggle('sel', S.selKey?.cam === c.dataset.cam);
+  });
 }
 
-// ---- SPL LOGGER ----
-let splLogging = false;
-let splLog = []; // { time, db }
-let splRefDb = 94;
-let splMax = -Infinity, splMin = Infinity, splSum = 0, splCount = 0;
-let splLastDraw = 0;
-
-function toggleSplLog() {
-  if (!state.audioCtx) { alert('Necesitás iniciar con audio.'); return; }
-  splLogging = !splLogging;
-  const btn = $('splStartBtn');
-  btn.textContent = splLogging ? '⏸ Pausar' : '▶ Iniciar';
-  btn.classList.toggle('active', splLogging);
+function renderCompat() {
+  const d = $('compatDisplay');
+  if (!S.selKey) { d.innerHTML = '<div style="color:var(--mute);padding:20px 0;font-size:11px;">Seleccioná una tonalidad</div>'; return; }
+  const c = getCompatible(S.selKey);
+  let html = `<div class="ck-display">
+    <div class="ck-cam">${S.selKey.cam}</div>
+    <div class="ck-mus">${S.selKey.m} · ${S.selKey.rkbx}</div>
+    <div class="ck-lbl">${S.selKey.type === 'maj' ? 'Major' : 'Minor'} · Selected Key</div>
+  </div>`;
+  const sec = (title, cls, items) => {
+    if (!items.length) return '';
+    return `<div class="compat-sec"><div class="compat-stitle ${cls}">${title}</div><div class="compat-list">${
+      items.map(k => `<div class="compat-item" data-cam="${k.cam}"><div class="ci-cam">${k.cam}</div><div class="ci-mus">${k.m} · ${k.rkbx}</div><div class="ci-desc">${k.reason}</div></div>`).join('')
+    }</div></div>`;
+  };
+  html += sec('Perfect Match', '', c.perfect) + sec('Energy Shift', 'warm', c.energy) + sec('Mood Change', '', c.mood) + sec('Bold', 'bold', c.bold) + sec('Risky', 'risk', c.risky);
+  d.innerHTML = html;
+  d.querySelectorAll('.compat-item').forEach(el => {
+    el.addEventListener('click', () => { S.selKey = byCam(el.dataset.cam); updateKeyGrid(); renderCompat(); saveState(); });
+  });
 }
 
-function clearSplLog() {
-  splLog = [];
-  splMax = -Infinity; splMin = Infinity; splSum = 0; splCount = 0;
-  $('splCurrentVal').textContent = '—';
-  $('splMax').textContent = '—';
-  $('splMin').textContent = '—';
-  $('splAvg').textContent = '—';
-  $('splTimestamps').innerHTML = '';
-  drawSplChart();
+document.querySelectorAll('.nbtn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.nbtn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active'); S.notation = b.dataset.n; updateKeyGrid(); saveState();
+  });
+});
+
+// ==================== TIMECODE ====================
+let setInterval_id = null, timerInterval_id = null;
+
+function tickClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  $('clockDisplay').textContent = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  $('clockDate').textContent = now.toLocaleDateString('es', { weekday: 'long', day: 'numeric', month: 'long' });
+  tickSet();
+  tickTimer();
+  tickEvents(now);
+}
+setInterval(tickClock, 1000);
+
+function tickSet() {
+  const pad = n => String(n).padStart(2, '0');
+  let elapsed = S.setElapsed;
+  if (S.setRunning && S.setStart) elapsed += Date.now() - S.setStart;
+  const h = Math.floor(elapsed / 3600000), m = Math.floor((elapsed % 3600000) / 60000), s = Math.floor((elapsed % 60000) / 1000);
+  $('setTimer').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
 }
 
-function processSplFrame(rms) {
-  if (!splLogging || !isFinite(rms)) return;
+function toggleSet() {
+  S.setRunning = !S.setRunning;
+  if (S.setRunning) { S.setStart = Date.now(); $('btnSetStart').textContent = '⏸ Pause'; $('btnSetStart').classList.add('on'); }
+  else { S.setElapsed += Date.now() - S.setStart; S.setStart = null; $('btnSetStart').textContent = '▶ Resume'; $('btnSetStart').classList.remove('on'); }
+}
+function resetSet() { S.setRunning = false; S.setStart = null; S.setElapsed = 0; $('btnSetStart').textContent = '▶ Start Set'; $('btnSetStart').classList.remove('on'); $('setTimer').textContent = '00:00:00'; }
 
-  // Convert RMS dBFS to approximate SPL using reference
-  // 0 dBFS ≈ splRefDb (calibration reference)
-  const spl = splRefDb + rms; // rms is negative dBFS
+function tickTimer() {
+  if (!S.timerRunning) return;
+  const remain = Math.max(0, S.timerEnd - Date.now());
+  const m = Math.floor(remain / 60000), s = Math.floor((remain % 60000) / 1000);
+  $('countdownDisplay').textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+  $('countdownDisplay').style.color = remain < 60000 ? 'var(--red)' : remain < 300000 ? 'var(--orange)' : 'var(--acc)';
+  if (remain === 0) { S.timerRunning = false; $('btnTimerStart').textContent = '▶ Start'; $('timerLbl').textContent = 'TIEMPO!'; }
+}
 
+function toggleTimer() {
+  if (S.timerRunning) { S.timerRunning = false; $('btnTimerStart').textContent = '▶ Resume'; }
+  else {
+    if (!S.timerEnd || S.timerEnd <= Date.now()) {
+      const m = parseInt($('timerMin').value) || 0, s = parseInt($('timerSec').value) || 0;
+      S.timerEnd = Date.now() + (m * 60 + s) * 1000;
+      $('timerLbl').textContent = 'COUNTDOWN';
+    }
+    S.timerRunning = true; $('btnTimerStart').textContent = '⏸ Pause';
+  }
+}
+function resetTimer() { S.timerRunning = false; S.timerEnd = null; $('btnTimerStart').textContent = '▶ Start'; $('countdownDisplay').textContent = '00:00'; $('countdownDisplay').style.color = 'var(--acc)'; $('timerLbl').textContent = 'COUNTDOWN'; }
+
+function tickEvents(now) {
+  renderEvents(now);
+}
+
+function addEvent() {
+  const t = $('evTime').value, n = $('evName').value.trim();
+  if (!t || !n) return;
+  S.events.push({ time: t, name: n });
+  S.events.sort((a, b) => a.time.localeCompare(b.time));
+  $('evTime').value = ''; $('evName').value = '';
+  renderEvents(new Date()); saveState();
+}
+function clearEvents() { if (confirm('¿Borrar todos los horarios?')) { S.events = []; renderEvents(new Date()); saveState(); } }
+
+function renderEvents(now) {
+  const el = $('eventList'); if (!el) return;
+  const cur = now.getHours() * 60 + now.getMinutes();
+  el.innerHTML = S.events.map(e => {
+    const [eh, em] = e.time.split(':').map(Number);
+    const eMin = eh * 60 + em, diff = eMin - cur;
+    const past = diff < 0, active = Math.abs(diff) < 5;
+    const leftStr = past ? (Math.abs(diff) + 'min atrás') : diff === 0 ? '¡AHORA!' : diff + 'min';
+    return `<div style="display:grid;grid-template-columns:50px 1fr 60px;gap:4px 8px;font-size:10px;padding:3px 6px;border-radius:3px;${active ? 'background:rgba(198,255,0,.08);border-left:2px solid var(--acc);' : past ? 'opacity:.5;' : ''}">
+      <span style="color:var(--acc);font-weight:700;">${e.time}</span>
+      <span>${e.name}</span>
+      <span style="color:var(--dim);font-size:9px;text-align:right;">${leftStr}</span>
+    </div>`;
+  }).join('');
+}
+
+// ==================== SPL LOGGER ====================
+let splRef = 94, splLastTs = 0;
+function processSpl(rms) {
+  const spl = splRef + rms;
   const now = Date.now();
-  splLog.push({ time: now, db: spl });
-
-  // Keep only window minutes
-  const winMs = parseInt($('splWinSlider')?.value || 20) * 60000;
-  while (splLog.length > 0 && now - splLog[0].time > winMs) splLog.shift();
-
-  // Update stats
-  splMax = Math.max(splMax, spl);
-  splMin = Math.min(splMin, spl);
-  splSum += spl; splCount++;
-  const avg = splSum / splCount;
-
-  // Color coding
-  const col = spl > 100 ? '#ff3344' : spl > 90 ? '#ffaa00' : '#C6FF00';
-  const el = $('splCurrentVal');
-  if (el) { el.textContent = spl.toFixed(1); el.style.color = col; }
-  if ($('splMax')) $('splMax').textContent = splMax.toFixed(1);
-  if ($('splMin')) $('splMin').textContent = splMin.toFixed(1);
-  if ($('splAvg')) $('splAvg').textContent = avg.toFixed(1);
-
-  // Timestamp every 5 min
-  if (splLog.length === 1 || now - splLog[splLog.length - 2]?.time > 300000) {
+  S.splLog.push({ time: now, db: spl });
+  const winMs = parseInt($('slSplWin')?.value || 20) * 60000;
+  while (S.splLog.length > 0 && now - S.splLog[0].time > winMs) S.splLog.shift();
+  S.splMax = Math.max(S.splMax, spl); S.splMin = Math.min(S.splMin, spl);
+  S.splSum += spl; S.splN++;
+  const col = spl > 100 ? 'danger' : spl > 90 ? 'warn' : '';
+  const el = $('splCurrent'); if (el) { el.textContent = spl.toFixed(1); el.className = 'spl-num ' + col; }
+  if ($('splPeak')) $('splPeak').textContent = S.splMax.toFixed(1);
+  if ($('splAvg')) $('splAvg').textContent = (S.splSum / S.splN).toFixed(1);
+  if ($('splMin')) $('splMin').textContent = S.splMin.toFixed(1);
+  if (now - splLastTs > 300000) {
+    splLastTs = now;
     const ts = $('splTimestamps');
-    if (ts) {
-      const time = new Date(now).toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-      ts.innerHTML += `<span style="color:#555">${time}</span> <span style="color:#C6FF00">${spl.toFixed(1)} dB</span> &nbsp; `;
-      ts.scrollTop = ts.scrollHeight;
-    }
+    if (ts) ts.innerHTML += `<span style="color:var(--mute)">${new Date(now).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</span> <span style="color:var(--acc)">${spl.toFixed(1)}dB</span> &nbsp;`;
   }
 }
 
 function drawSplChart() {
-  const canvas = $('splCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
-  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
-  const dpr = devicePixelRatio;
-
+  const cv = $('splCanvas'); if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width = cv.clientWidth * devicePixelRatio, H = cv.height = cv.clientHeight * devicePixelRatio, dpr = devicePixelRatio;
   ctx.clearRect(0, 0, W, H);
-
-  if (splLog.length < 2) {
-    ctx.fillStyle = '#333';
-    ctx.font = `${9*dpr}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.fillText('Iniciá el logger para ver el gráfico', W/2, H/2);
-    return;
+  if (S.splLog.length < 2) {
+    ctx.fillStyle = '#333'; ctx.font = `${10*dpr}px monospace`; ctx.textAlign = 'center';
+    ctx.fillText('Iniciá el logger para ver el gráfico de SPL', W/2, H/2); return;
   }
-
-  const dbMin = 60, dbMax = 115;
-  const now = Date.now();
-  const winMs = parseInt($('splWinSlider')?.value || 20) * 60000;
-  const tMin = now - winMs;
-
-  // Grid lines
-  ctx.strokeStyle = '#1a1a1a';
-  ctx.lineWidth = 1;
-  [70,80,90,100,110].forEach(db => {
+  const dbMin = 60, dbMax = 115, now = Date.now();
+  const winMs = parseInt($('slSplWin')?.value || 20) * 60000, tMin = now - winMs;
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
+  [70, 80, 90, 100, 110].forEach(db => {
     const y = H - (db - dbMin) / (dbMax - dbMin) * H;
     ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-    ctx.fillStyle = '#444';
-    ctx.font = `${8*dpr}px monospace`;
-    ctx.textAlign = 'left';
-    ctx.fillText(db+'dB', 2, y - 2);
+    ctx.fillStyle = '#555'; ctx.font = `${8*dpr}px monospace`; ctx.textAlign = 'left'; ctx.fillText(db+'dB', 2, y-2);
   });
-
-  // 90dB warning line
   const y90 = H - (90 - dbMin) / (dbMax - dbMin) * H;
-  ctx.strokeStyle = '#ff330444';
-  ctx.lineWidth = 1.5 * dpr;
-  ctx.setLineDash([4*dpr, 4*dpr]);
-  ctx.beginPath(); ctx.moveTo(0, y90); ctx.lineTo(W, y90); ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Fill under curve
+  ctx.strokeStyle = '#ff330433'; ctx.lineWidth = 1.5*dpr; ctx.setLineDash([4*dpr,4*dpr]);
+  ctx.beginPath(); ctx.moveTo(0,y90); ctx.lineTo(W,y90); ctx.stroke(); ctx.setLineDash([]);
+  // Fill
   ctx.beginPath();
-  splLog.forEach((pt, i) => {
-    const x = (pt.time - tMin) / winMs * W;
-    const y = H - (pt.db - dbMin) / (dbMax - dbMin) * H;
+  S.splLog.forEach((pt, i) => {
+    const x = (pt.time - tMin) / winMs * W, y = H - (pt.db - dbMin) / (dbMax - dbMin) * H;
     i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
   });
   ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
-  ctx.fillStyle = 'rgba(198,255,0,0.08)';
-  ctx.fill();
-
-  // Line — colored by level
-  splLog.forEach((pt, i) => {
-    if (i === 0) return;
-    const prev = splLog[i-1];
-    const x1 = (prev.time - tMin) / winMs * W;
-    const y1 = H - (prev.db - dbMin) / (dbMax - dbMin) * H;
-    const x2 = (pt.time - tMin) / winMs * W;
-    const y2 = H - (pt.db - dbMin) / (dbMax - dbMin) * H;
+  ctx.fillStyle = 'rgba(198,255,0,.06)'; ctx.fill();
+  // Line colored
+  S.splLog.forEach((pt, i) => {
+    if (!i) return;
+    const prev = S.splLog[i-1];
+    const x1 = (prev.time-tMin)/winMs*W, y1 = H-(prev.db-dbMin)/(dbMax-dbMin)*H;
+    const x2 = (pt.time-tMin)/winMs*W, y2 = H-(pt.db-dbMin)/(dbMax-dbMin)*H;
     ctx.strokeStyle = pt.db > 100 ? '#ff3344' : pt.db > 90 ? '#ffaa00' : '#C6FF00';
-    ctx.lineWidth = 1.5 * dpr;
-    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+    ctx.lineWidth = 1.5*dpr; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
   });
 }
 
-function exportSplCsv() {
-  if (splLog.length === 0) { alert('No hay datos para exportar.'); return; }
-  const rows = ['Tiempo,SPL (dB)'];
-  splLog.forEach(pt => {
-    const t = new Date(pt.time).toLocaleTimeString('es');
-    rows.push(`${t},${pt.db.toFixed(2)}`);
-  });
-  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `spl-log-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
+function toggleSpl() {
+  if (!A.ctx) { alert('Necesitás iniciar con audio.'); return; }
+  S.splLogging = !S.splLogging;
+  const btn = $('btnSplStart');
+  btn.textContent = S.splLogging ? '⏸ Pausar' : '▶ Iniciar';
+  btn.classList.toggle('on', S.splLogging);
+}
+function clearSpl() { S.splLog=[]; S.splMax=-Infinity; S.splMin=Infinity; S.splSum=0; S.splN=0; splLastTs=0; ['splCurrent','splPeak','splAvg','splMin'].forEach(id => { const e=$(id); if(e) e.textContent='—'; }); if($('splTimestamps')) $('splTimestamps').innerHTML=''; drawSplChart(); }
+function exportSpl() {
+  if (!S.splLog.length) { alert('No hay datos.'); return; }
+  const rows = ['Tiempo,SPL (dB)', ...S.splLog.map(p => `${new Date(p.time).toLocaleTimeString('es')},${p.db.toFixed(2)}`)];
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([rows.join('\n')], { type:'text/csv' }));
+  a.download = `spl-${new Date().toISOString().slice(0,10)}.csv`; a.click();
 }
 
-// ---- DELAY CALCULATOR ----
-function calcDelay() {
-  const dist = parseFloat($('delayDist')?.value) || 10;
-  const temp = parseFloat($('delayTemp')?.value) || 22;
-  const speed = 331.3 + 0.606 * temp; // m/s
-  const ms = (dist / speed) * 1000;
-  const samples48 = Math.round(ms * 48);
-  const samples441 = Math.round(ms * 44.1);
+// ==================== CLUB - FLOOR PLAN ====================
+const FP = { tool: 'move', type: 'K12.2' };
+const SP_COL = { 'K12.2': '#C6FF00', 'SUB': '#ff3060', 'MON': '#30aaff' };
+const SP_RAD = { 'K12.2': 14, 'SUB': 18, 'MON': 11 };
+let fpDragging = null, fpDragOff = { x: 0, y: 0 };
+let fpInited = false;
 
-  if ($('delayMs')) $('delayMs').textContent = ms.toFixed(2);
-  if ($('delaySamples')) $('delaySamples').textContent = samples48;
-  if ($('delaySpeedSound')) $('delaySpeedSound').textContent = speed.toFixed(1);
-  if ($('delayFrames')) $('delayFrames').textContent = samples441;
+const WALLS = [
+  [[.04,.08],[.55,.04],[.55,.88],[.04,.92]],
+  [[.55,.04],[.82,.04],[.82,.44],[.55,.44]],
+  [[.55,.44],[.82,.44],[.82,.92],[.55,.92]],
+];
+const LABELS = [
+  { t:'SALA PRINCIPAL', x:.28, y:.50 }, { t:'ZONA CHILL', x:.68, y:.24 },
+  { t:'BAÑOS / BACK', x:.68, y:.68 }, { t:'BOOTH', x:.28, y:.12 },
+  { t:'DSP 1 · MAIN', x:.28, y:.08 }, { t:'DSP 2 · STUDIO', x:.68, y:.08 },
+];
+
+function fpTool(t) {
+  FP.tool = t;
+  ['fpMove','fpAdd','fpDel'].forEach(id => $(id)?.classList.remove('on'));
+  const map = { move:'fpMove', add:'fpAdd', del:'fpDel' };
+  $(map[t])?.classList.add('on');
+  const cv = $('floorCanvas'); if (cv) cv.style.cursor = t==='add'?'crosshair':t==='del'?'not-allowed':'grab';
 }
-
-function setDelayDist(d) {
-  const el = $('delayDist');
-  if (el) { el.value = d; calcDelay(); }
+function spType(t) {
+  FP.type = t;
+  ['spK12','spSub','spMon'].forEach(id => $(id)?.classList.remove('on'));
+  const map = { 'K12.2':'spK12', 'SUB':'spSub', 'MON':'spMon' };
+  $(map[t])?.classList.add('on');
 }
+function fpReset() { if (confirm('¿Borrar todos los parlantes?')) { S.speakers=[]; S.fpNextId=1; drawFloor(); saveFp(); } }
 
-// ---- PHASE METER ----
-let phaseMeasuring = false;
-let phaseHistory = []; // per-bin phase differences
-
-function togglePhase() {
-  if (!state.audioCtx) { alert('Necesitás iniciar con audio.'); return; }
-  phaseMeasuring = !phaseMeasuring;
-  const btn = $('phaseStartBtn');
-  if (btn) {
-    btn.textContent = phaseMeasuring ? '⏸ Detener' : '▶ Medir';
-    btn.classList.toggle('active', phaseMeasuring);
-  }
-  if (!phaseMeasuring) phaseHistory = [];
-}
-
-function processPhaseFrame() {
-  if (!phaseMeasuring || !state.freqData || !state.audioCtx) return;
-
-  // Use left/right channels to estimate phase correlation
-  // With single mic this shows autocorrelation — useful for detecting
-  // comb filtering (phase issues with multiple sources)
-  if (!state.timeDataL || !state.timeDataR) return;
-
-  const L = state.timeDataL;
-  const R = state.timeDataR;
-  const n = Math.min(L.length, R.length);
-
-  // Compute cross-correlation at lag=0 (phase coherence)
-  let sumLR = 0, sumL2 = 0, sumR2 = 0;
-  for (let i = 0; i < n; i++) {
-    sumLR += L[i] * R[i];
-    sumL2 += L[i] * L[i];
-    sumR2 += R[i] * R[i];
-  }
-  const denom = Math.sqrt(sumL2 * sumR2);
-  const correlation = denom > 0 ? sumLR / denom : 0; // -1 to +1
-
-  // Phase angle from correlation (-1=180°, 0=90°, 1=0°)
-  const phaseAngle = Math.acos(Math.max(-1, Math.min(1, correlation))) * (180 / Math.PI);
-
-  phaseHistory.push(phaseAngle);
-  if (phaseHistory.length > 60) phaseHistory.shift();
-
-  // Band-specific phase from spectrum
-  // Use phase proxy from freq data variance in each band
-  const getPhaseInBand = (fmin, fmax) => {
-    if (!state.freqData) return 0;
-    const i1 = Math.round(fmin / (state.audioCtx.sampleRate/2) * state.freqData.length);
-    const i2 = Math.round(fmax / (state.audioCtx.sampleRate/2) * state.freqData.length);
-    let v = 0, c = 0;
-    for (let i = i1; i < i2 && i < state.freqData.length; i++) {
-      if (isFinite(state.freqData[i])) { v += state.freqData[i]; c++; }
-    }
-    return c > 0 ? v / c : -90;
-  };
-
-  // Map dBFS band average to phase proxy (very rough — real phase needs 2 mics)
-  // Show correlation-based estimate per band
-  const phaseLow = phaseAngle * 0.8 + (Math.random() - 0.5) * 5;
-  const phaseMid = phaseAngle + (Math.random() - 0.5) * 8;
-  const phaseHighVal = phaseAngle * 1.2 + (Math.random() - 0.5) * 10;
-
-  const fmtPhase = (v, elId) => {
-    const el = $(elId);
-    if (!el) return;
-    el.textContent = v.toFixed(0) + '°';
-    el.className = 'phase-meter-val ' + (Math.abs(v) < 30 ? 'good' : Math.abs(v) < 90 ? 'warn' : 'bad');
-  };
-
-  fmtPhase(phaseLow, 'phaseLow');
-  fmtPhase(phaseMid, 'phaseMid');
-  fmtPhase(phaseHighVal, 'phaseHigh');
-
-  // Warning
-  const warn = $('phaseWarning');
-  if (warn) warn.style.display = Math.abs(phaseAngle) > 150 ? 'block' : 'none';
-
-  drawPhaseChart(phaseAngle);
-}
-
-function drawPhaseChart(current) {
-  const canvas = $('phaseCanvas');
-  if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.clientWidth * devicePixelRatio;
-  const H = canvas.height = canvas.clientHeight * devicePixelRatio;
-  const dpr = devicePixelRatio;
-
+function drawFloor() {
+  const cv = $('floorCanvas'); if (!cv || !cv.clientWidth) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width = cv.clientWidth * devicePixelRatio, H = cv.height = cv.clientHeight * devicePixelRatio, dpr = devicePixelRatio;
   ctx.clearRect(0, 0, W, H);
-
-  // Background zones
-  const zoneW = W / 6;
-  // Green zone (0-30°)
-  ctx.fillStyle = 'rgba(198,255,0,0.06)';
-  ctx.fillRect(W/2 - zoneW, 0, zoneW*2, H);
-  // Orange zones (30-90°)
-  ctx.fillStyle = 'rgba(255,170,0,0.06)';
-  ctx.fillRect(W/2 - zoneW*3, 0, zoneW, H);
-  ctx.fillRect(W/2 + zoneW*2, 0, zoneW, H);
-
-  // Center line
-  ctx.strokeStyle = '#333';
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
-
-  // Phase history
-  if (phaseHistory.length > 1) {
-    ctx.strokeStyle = 'rgba(198,255,0,0.5)';
-    ctx.lineWidth = 1.5 * dpr;
+  // Grid
+  ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1;
+  for (let x=0;x<W;x+=40*dpr){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for (let y=0;y<H;y+=40*dpr){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Walls
+  WALLS.forEach(poly => {
+    ctx.fillStyle = 'rgba(28,28,28,.8)'; ctx.strokeStyle = '#555'; ctx.lineWidth = 2*dpr;
     ctx.beginPath();
-    phaseHistory.forEach((ph, i) => {
-      const x = (i / phaseHistory.length) * W;
-      const y = H/2 + (ph / 180) * (H/2);
-      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-    });
+    poly.forEach(([x,y],i) => i?ctx.lineTo(x*W,y*H):ctx.moveTo(x*W,y*H));
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  });
+  // Labels
+  ctx.textAlign = 'center'; ctx.fillStyle = '#444'; ctx.font = `${9*dpr}px monospace`;
+  LABELS.forEach(({t,x,y}) => ctx.fillText(t, x*W, y*H));
+  // Speakers
+  S.speakers.forEach(sp => {
+    const px=sp.x*W, py=sp.y*H, r=SP_RAD[sp.type]*dpr, col=SP_COL[sp.type];
+    const g = ctx.createRadialGradient(px,py,r*.3,px,py,r*2);
+    g.addColorStop(0,col+'40'); g.addColorStop(1,'transparent');
+    ctx.fillStyle=g; ctx.beginPath(); ctx.arc(px,py,r*2,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=col+'22'; ctx.strokeStyle=col; ctx.lineWidth=2*dpr;
+    ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle=col; ctx.lineWidth=1.5*dpr;
+    ctx.beginPath(); ctx.moveTo(px,py); ctx.lineTo(px,py-r-6*dpr); ctx.stroke();
+    ctx.fillStyle=col; ctx.font=`bold ${8*dpr}px monospace`; ctx.textAlign='center';
+    ctx.fillText(`${sp.type.split(' ')[0]}${sp.id}`, px, py+r+12*dpr);
+  });
+}
+
+function initFloor() {
+  const cv = $('floorCanvas'); if (!cv || fpInited) return;
+  fpInited = true;
+  const pos = e => {
+    const r = cv.getBoundingClientRect();
+    const cx = e.touches?.[0]?.clientX ?? e.clientX, cy = e.touches?.[0]?.clientY ?? e.clientY;
+    return { x:(cx-r.left)/r.width, y:(cy-r.top)/r.height };
+  };
+  const nearest = p => S.speakers.find(s => Math.hypot(s.x-p.x,s.y-p.y)<.05);
+  cv.addEventListener('pointerdown', e => {
+    e.preventDefault(); const p = pos(e);
+    if (FP.tool==='add') { S.speakers.push({id:S.fpNextId++,type:FP.type,x:p.x,y:p.y}); drawFloor(); saveFp(); }
+    else if (FP.tool==='del') { const s=nearest(p); if(s){S.speakers=S.speakers.filter(x=>x.id!==s.id);drawFloor();saveFp();} }
+    else { const s=nearest(p); if(s){fpDragging=s;fpDragOff={x:p.x-s.x,y:p.y-s.y};cv.style.cursor='grabbing';} }
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!fpDragging) return; e.preventDefault(); const p=pos(e);
+    fpDragging.x=Math.max(0,Math.min(1,p.x-fpDragOff.x));
+    fpDragging.y=Math.max(0,Math.min(1,p.y-fpDragOff.y));
+    drawFloor();
+  });
+  cv.addEventListener('pointerup', () => { if(fpDragging){fpDragging=null;cv.style.cursor='grab';saveFp();} });
+  window.addEventListener('resize', drawFloor);
+  drawFloor();
+}
+
+function saveFp() { try{const d=JSON.parse(ls.getItem('mjt')||'{}');d.sp=S.speakers;d.fpId=S.fpNextId;ls.setItem('mjt',JSON.stringify(d));}catch(e){} }
+
+// ==================== PHASE ====================
+let phHist = [];
+function togglePhase() {
+  S.phaseMeasuring = !S.phaseMeasuring;
+  const btn=$('btnPhase'); if(!btn)return;
+  btn.textContent=S.phaseMeasuring?'⏸ Detener':'▶ Medir';
+  btn.classList.toggle('on',S.phaseMeasuring);
+  if(!S.phaseMeasuring) phHist=[];
+}
+
+function processPhase() {
+  if(!A.tL||!A.tR)return;
+  const n=Math.min(A.tL.length,A.tR.length); let slr=0,sl2=0,sr2=0;
+  for(let i=0;i<n;i++){slr+=A.tL[i]*A.tR[i];sl2+=A.tL[i]*A.tL[i];sr2+=A.tR[i]*A.tR[i];}
+  const den=Math.sqrt(sl2*sr2), corr=den>0?slr/den:0;
+  const angle=Math.acos(Math.max(-1,Math.min(1,corr)))*180/Math.PI;
+  phHist.push(angle); if(phHist.length>60)phHist.shift();
+  const fmt=(v,id)=>{ const e=$(id); if(!e)return; e.textContent=v.toFixed(0)+'°'; e.className='ph-val '+(Math.abs(v)<30?'good':Math.abs(v)<90?'warn':'bad'); };
+  fmt(angle*.8+Math.random()*4,'phLow'); fmt(angle+Math.random()*6,'phMid'); fmt(angle*1.1+Math.random()*8,'phHigh');
+  const w=$('phaseWarn'); if(w)w.style.display=angle>150?'block':'none';
+}
+
+function drawPhaseChart() {
+  const cv=$('phaseCanvas'); if(!cv||!cv.clientWidth)return;
+  const ctx=cv.getContext('2d');
+  const W=cv.width=cv.clientWidth*devicePixelRatio, H=cv.height=cv.clientHeight*devicePixelRatio, dpr=devicePixelRatio;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='rgba(198,255,0,.05)'; ctx.fillRect(W/2-W/6,0,W/3,H);
+  ctx.strokeStyle='#333'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
+  if(phHist.length>1){
+    ctx.strokeStyle='rgba(198,255,0,.6)'; ctx.lineWidth=1.5*dpr; ctx.beginPath();
+    phHist.forEach((v,i)=>{ const x=i/phHist.length*W, y=H/2+v/180*(H/2); i?ctx.lineTo(x,y):ctx.moveTo(x,y); });
     ctx.stroke();
   }
-
-  // Current value needle
-  if (isFinite(current)) {
-    const needleX = W/2 + (current / 180) * (W/2);
-    const col = Math.abs(current) < 30 ? '#C6FF00' : Math.abs(current) < 90 ? '#ffaa00' : '#ff3344';
-    ctx.fillStyle = col;
-    ctx.beginPath();
-    ctx.arc(needleX, H/2, 6*dpr, 0, Math.PI*2);
-    ctx.fill();
-
-    ctx.fillStyle = col;
-    ctx.font = `bold ${9*dpr}px monospace`;
-    ctx.textAlign = 'center';
-    ctx.fillText(current.toFixed(0)+'°', needleX, H - 4*dpr);
+  if(phHist.length){
+    const v=phHist[phHist.length-1], nx=W/2+v/180*(W/2);
+    const col=Math.abs(v)<30?'#C6FF00':Math.abs(v)<90?'#ffaa00':'#ff3344';
+    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(nx,H/2,5*dpr,0,Math.PI*2); ctx.fill();
   }
-
-  // Labels
-  ctx.fillStyle = '#555';
-  ctx.font = `${8*dpr}px monospace`;
-  ctx.textAlign = 'center';
-  ctx.fillText('-180°', 10*dpr, H/2);
-  ctx.fillText('0°', W/2, 10*dpr);
-  ctx.fillText('+180°', W-10*dpr, H/2);
 }
 
-// Hook into main loop for club processing
-function processClubFrame(rms) {
-  const clubActive = document.querySelector('.tab[data-tab="club"]')?.classList.contains('active');
-  if (clubActive) {
-    const now = performance.now();
-    // Redraw SPL chart every 500ms when active
-    if (now - splLastDraw > 500) {
-      drawSplChart();
-      splLastDraw = now;
-    }
+// ==================== DELAY CALC ====================
+function calcDelay() {
+  const dist=parseFloat($('dlDist')?.value)||10, temp=parseFloat($('dlTemp')?.value)||22;
+  const spd=331.3+.606*temp, ms=dist/spd*1000;
+  if($('dlMs'))$('dlMs').textContent=ms.toFixed(2);
+  if($('dlSmp'))$('dlSmp').textContent=Math.round(ms*48);
+  if($('dlSpd'))$('dlSpd').textContent=spd.toFixed(1);
+  if($('dlSmp44'))$('dlSmp44').textContent=Math.round(ms*44.1);
+}
+function setDlDist(d) { const e=$('dlDist');if(e){e.value=d;calcDelay();} }
+
+// ==================== VENU360 ====================
+function initVenu360() {
+  const defaults = () => ({
+    name: 'Nuevo Preset',
+    inputs: [
+      { id: 1, label: 'IN 1', afs: true, geq: Array(31).fill(0), peq: [] },
+      { id: 2, label: 'IN 2', afs: true, geq: Array(31).fill(0), peq: [] },
+      { id: 3, label: 'IN 3', afs: false, geq: Array(31).fill(0), peq: [] },
+    ],
+    outputs: [
+      { id: 1, label: 'OUT 1', assign:'SUB', xover:{type:'LP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-20,ratio:4,attack:10,release:100}, delay:0, gain:0, limit:-3 },
+      { id: 2, label: 'OUT 2', assign:'SUB', xover:{type:'LP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-20,ratio:4,attack:10,release:100}, delay:0, gain:0, limit:-3 },
+      { id: 3, label: 'OUT 3', assign:'K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:0, gain:0, limit:-3 },
+      { id: 4, label: 'OUT 4', assign:'K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:0, gain:0, limit:-3 },
+      { id: 5, label: 'OUT 5', assign:'K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:0, gain:0, limit:-3 },
+      { id: 6, label: 'OUT 6', assign:'K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:0, gain:0, limit:-3 },
+    ]
+  });
+
+  if (!S.venuPresets) {
+    S.venuPresets = [
+      { ...defaults(), name: '12 · Colombo Main FOG',
+        inputs: [
+          { id:1, label:'MIX-1', afs:true,  geq:Array(31).fill(0), peq:[] },
+          { id:2, label:'MIX-2', afs:true,  geq:Array(31).fill(0), peq:[] },
+          { id:3, label:'MIX-3', afs:false, geq:Array(31).fill(0), peq:[] },
+        ],
+        outputs: [
+          { id:1, label:'OUT 1 · SUB A', assign:'SUB DAS 18"', xover:{type:'LP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:4,attack:5,release:80}, delay:0, gain:0, limit:-3 },
+          { id:2, label:'OUT 2 · SUB B', assign:'SUB DAS 18"', xover:{type:'LP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:4,attack:5,release:80}, delay:0, gain:0, limit:-3 },
+          { id:3, label:'OUT 3 · K12 Z1', assign:'QSC K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:8.7, gain:0, limit:-3 },
+          { id:4, label:'OUT 4 · K12 Z2', assign:'QSC K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:14.2, gain:0, limit:-3 },
+          { id:5, label:'OUT 5 · K12 Z3', assign:'QSC K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:21.5, gain:0, limit:-3 },
+          { id:6, label:'OUT 6 · K12 Z4', assign:'QSC K12.2', xover:{type:'HP',freq:120,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:29.0, gain:0, limit:-3 },
+        ]
+      },
+      { ...defaults(), name: '13 · Studio Colombo FOG',
+        inputs: [
+          { id:1, label:'IN 1', afs:false, geq:Array(31).fill(0), peq:[] },
+          { id:2, label:'IN 2', afs:false, geq:Array(31).fill(0), peq:[] },
+          { id:3, label:'IN 3', afs:false, geq:Array(31).fill(0), peq:[] },
+        ],
+        outputs: [
+          { id:1, label:'OUT 1 · SUB', assign:'SUB DAS 18"', xover:{type:'LP',freq:100,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-20,ratio:4,attack:5,release:80}, delay:0, gain:0, limit:-3 },
+          { id:2, label:'OUT 2 · K12', assign:'QSC K12.2', xover:{type:'HP',freq:100,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:0, gain:0, limit:-3 },
+          { id:3, label:'OUT 3 · K12', assign:'QSC K12.2', xover:{type:'HP',freq:100,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:5.8, gain:0, limit:-3 },
+          { id:4, label:'OUT 4 · K12', assign:'QSC K12.2', xover:{type:'HP',freq:100,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:11.6, gain:0, limit:-3 },
+          { id:5, label:'OUT 5 · K12', assign:'QSC K12.2', xover:{type:'HP',freq:100,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:17.4, gain:0, limit:-3 },
+          { id:6, label:'OUT 6 · K12', assign:'QSC K12.2', xover:{type:'HP',freq:100,slope:24}, aeq:Array(10).fill(0), comp:{thresh:-18,ratio:3,attack:10,release:100}, delay:23.2, gain:0, limit:-3 },
+        ]
+      },
+      defaults()
+    ];
   }
-  processSplFrame(rms);
-  processPhaseFrame();
+  renderVenu(0);
 }
 
-// Init club tab when tab is clicked
-document.querySelector('[data-tab="club"]')?.addEventListener('click', () => {
-  // Multiple timeouts to handle canvas resize race condition
-  setTimeout(() => { initFloorPlan(); calcDelay(); drawSplChart(); }, 50);
-  setTimeout(() => { drawFloorPlan(); drawSplChart(); }, 200);
-  setTimeout(() => { drawFloorPlan(); }, 500);
+let venuSelPreset = 0, venuSelOut = 0, venuSelBlock = 'xover';
+
+function venuPreset(idx, btn) {
+  venuSelPreset = idx; venuSelOut = 0; venuSelBlock = 'xover';
+  document.querySelectorAll('.venu-preset-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderVenu(idx);
+}
+
+function renderVenu(idx) {
+  const pr = S.venuPresets?.[idx]; if (!pr) return;
+  const main = $('venuMain'); if (!main) return;
+
+  const sliderRow = (lbl, val, min, max, step, unit, onchange) =>
+    `<div class="vp-row"><span class="vp-lbl">${lbl}</span>
+    <input type="range" class="vp-slider" value="${val}" min="${min}" max="${max}" step="${step}" oninput="this.nextElementSibling.textContent=this.value+'${unit}';${onchange}">
+    <span class="vp-val">${val}${unit}</span></div>`;
+
+  // INPUTS section
+  let inputsHtml = `<div class="venu-section">
+    <div class="ptitle">Inputs (3×)</div>
+    <div class="venu-io-grid">`;
+  pr.inputs.forEach(inp => {
+    inputsHtml += `<div class="venu-io-card">
+      <div class="venu-io-num">${inp.id}</div>
+      <div class="venu-io-lbl">${inp.label}</div>
+      <div class="venu-meter"><div class="venu-meter-fill" style="width:${Math.random()*70+20}%"></div></div>
+      <div style="margin-top:4px;font-size:8px;color:var(--dim);">
+        <span style="color:${inp.afs?'var(--acc)':'var(--mute)'}">AFS</span> · GEQ
+      </div>
+    </div>`;
+  });
+  inputsHtml += `</div></div>`;
+
+  // OUTPUTS section
+  let outsHtml = `<div class="venu-section">
+    <div class="ptitle">Outputs (6×) — Seleccioná para editar</div>
+    <div class="out-grid">`;
+  pr.outputs.forEach((out, i) => {
+    outsHtml += `<div class="out-card ${i===venuSelOut?'sel':''}" onclick="venuSelOut=${i};renderVenu(${idx})">
+      <div class="out-num">${out.id}</div>
+      <div class="out-lbl" style="font-size:7px;">${out.assign}</div>
+      <div class="venu-meter" style="margin-top:4px;"><div class="venu-meter-fill" style="width:${Math.random()*70+20}%"></div></div>
+    </div>`;
+  });
+  outsHtml += `</div></div>`;
+
+  // SELECTED OUTPUT detail
+  const out = pr.outputs[venuSelOut];
+  const blockBtns = ['xover','aeq','comp','delay','limit'].map(b =>
+    `<div class="vblk ${venuSelBlock===b?'active':''}" onclick="venuSelBlock='${b}';renderVenu(${idx})">${b.toUpperCase()}</div>`
+  ).join('<span class="vblk-arrow">→</span>');
+
+  let blockParams = '';
+  if (venuSelBlock === 'xover') {
+    blockParams = `<div class="venu-params">
+      ${sliderRow('Freq (Hz)', out.xover.freq, 20, 2000, 1, 'Hz', '')}
+      ${sliderRow('Slope (dB/oct)', out.xover.slope, 6, 48, 6, 'dB', '')}
+      <div class="vp-row"><span class="vp-lbl">Type</span>
+        <div style="display:flex;gap:4px;">
+          <button class="btn ${out.xover.type==='LP'?'on':''}" onclick="vPr(${idx}).outputs[${venuSelOut}].xover.type='LP';renderVenu(${idx})">LP</button>
+          <button class="btn ${out.xover.type==='HP'?'on':''}" onclick="vPr(${idx}).outputs[${venuSelOut}].xover.type='HP';renderVenu(${idx})">HP</button>
+          <button class="btn ${out.xover.type==='BP'?'on':''}" onclick="vPr(${idx}).outputs[${venuSelOut}].xover.type='BP';renderVenu(${idx})">BP</button>
+        </div>
+      </div>
+    </div>`;
+  } else if (venuSelBlock === 'comp') {
+    blockParams = `<div class="venu-params">
+      ${sliderRow('Threshold', out.comp.thresh, -40, 0, 1, 'dBFS', '')}
+      ${sliderRow('Ratio', out.comp.ratio, 1, 20, 0.5, ':1', '')}
+      ${sliderRow('Attack', out.comp.attack, 0.1, 200, 0.1, 'ms', '')}
+      ${sliderRow('Release', out.comp.release, 10, 2000, 10, 'ms', '')}
+    </div>`;
+  } else if (venuSelBlock === 'delay') {
+    blockParams = `<div class="venu-params">
+      ${sliderRow('Delay', out.delay, 0, 1000, 0.1, 'ms', '')}
+      <div class="vp-row"><span class="vp-lbl">→ Samples @48k</span><span class="vp-val">${Math.round(out.delay*48)}</span></div>
+      <div class="vp-row"><span class="vp-lbl">→ Distancia equiv.</span><span class="vp-val">${(out.delay/1000*(331.3+.606*22)).toFixed(1)}m</span></div>
+    </div>`;
+  } else if (venuSelBlock === 'limit') {
+    blockParams = `<div class="venu-params">
+      ${sliderRow('Limit', out.limit, -20, 0, 0.5, 'dBFS', '')}
+      ${sliderRow('Gain', out.gain, -12, 12, 0.5, 'dB', '')}
+    </div>`;
+  } else if (venuSelBlock === 'aeq') {
+    const peqFreqs = [63,125,250,500,1000,2000,4000,8000,16000,20000];
+    blockParams = `<div class="venu-params">
+      <div style="font-size:9px;color:var(--dim);margin-bottom:4px;">Auto EQ — 10 bandas paramétricas</div>
+      ${peqFreqs.map((f,i) => `<div class="peq-band">
+        <span class="peq-lbl">${f>=1000?f/1000+'k':f}Hz</span>
+        <input type="range" class="vp-slider" value="${out.aeq[i]||0}" min="-12" max="12" step=".5" style="flex:1;">
+        <span style="font-size:9px;color:var(--acc);min-width:30px;text-align:right;">${(out.aeq[i]||0).toFixed(1)}dB</span>
+        <input type="range" class="vp-slider" value="1.0" min=".3" max="10" step=".1" style="width:50px;" title="Q">
+      </div>`).join('')}
+    </div>`;
+  }
+
+  const outDetail = `<div class="venu-section">
+    <div class="ptitle">${out.label} · ${out.assign}
+      <div style="display:flex;gap:4px;">
+        <span style="font-size:9px;color:var(--dim);">Signal chain:</span>
+      </div>
+    </div>
+    <div class="venu-block-chain">${blockBtns}</div>
+    ${blockParams}
+  </div>`;
+
+  main.innerHTML = inputsHtml + outsHtml + outDetail;
+}
+
+function vPr(idx) { return S.venuPresets?.[idx]; }
+function venuSave() { saveState(); const btn=document.querySelector('.venu-nav .btn.acc'); if(btn){const t=btn.textContent;btn.textContent='💾 Guardado ✓';setTimeout(()=>btn.textContent=t,1500);} }
+
+// ==================== PERSISTENCE ====================
+const ls = localStorage;
+function saveState() {
+  try {
+    ls.setItem('mjt', JSON.stringify({
+      bandMode: S.bandMode, winMin: S.winMin, autoLock: S.autoLock, gainDb: S.gainDb, zoomMin: S.zoomMin,
+      smooth: $('slSmooth')?.value,
+      notation: S.notation, selKey: S.selKey?.cam,
+      events: S.events,
+      sp: S.speakers, fpId: S.fpNextId,
+      venuPresets: S.venuPresets,
+      target: S.target ? { spectrum: Array.from(S.target.spectrum), bandLevels: S.target.bandLevels, lufs: S.target.lufs, peak: S.target.peak, rms: S.target.rms, crest: S.target.crest } : null,
+    }));
+  } catch (e) {}
+}
+
+function loadState() {
+  try {
+    const d = JSON.parse(ls.getItem('mjt') || '{}');
+    if (d.bandMode) { S.bandMode = d.bandMode; S.bands = d.bandMode === 3 ? BANDS3 : BANDS4; $('btnBands').textContent = d.bandMode+'-Band'; buildBands(); }
+    if (d.winMin) { S.winMin = d.winMin; const sl=$('slWin');if(sl)sl.value=d.winMin; $('svWin').textContent=d.winMin+'min'; }
+    if (d.autoLock !== undefined) { S.autoLock = d.autoLock; const b=$('btnAutoLock');if(b){b.textContent='Auto: '+(d.autoLock?'ON':'OFF');b.classList.toggle('on',d.autoLock);} }
+    if (d.smooth) { const sl=$('slSmooth');if(sl)sl.value=d.smooth;$('svSmooth').textContent=(d.smooth/100).toFixed(2); }
+    if (d.gainDb) { setGain(d.gainDb); const sl=$('slGain');if(sl)sl.value=d.gainDb; }
+    if (d.zoomMin) { S.zoomMin=d.zoomMin; $('svZoom').textContent=d.zoomMin+'dB'; }
+    if (d.notation) { S.notation=d.notation; document.querySelectorAll('.nbtn').forEach(b=>b.classList.toggle('active',b.dataset.n===S.notation)); }
+    if (d.selKey) { S.selKey=byCam(d.selKey); updateKeyGrid(); renderCompat(); }
+    if (d.events) { S.events=d.events; renderEvents(new Date()); }
+    if (d.sp) { S.speakers=d.sp; S.fpNextId=d.fpId||d.sp.length+1; }
+    if (d.venuPresets) S.venuPresets=d.venuPresets;
+    if (d.target) { S.target={...d.target,spectrum:new Float32Array(d.target.spectrum)}; }
+  } catch (e) {}
+}
+
+// ==================== TABS ====================
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.tc').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    $('tc-' + t.dataset.tab).classList.add('active');
+    const tab = t.dataset.tab;
+    if (tab === 'club') { setTimeout(() => { initFloor(); drawFloor(); calcDelay(); }, 80); setTimeout(drawFloor, 300); }
+    if (tab === 'venu') initVenu360();
+    if (tab === 'spl') setTimeout(drawSplChart, 80);
+  });
 });
 
-// ============ END CLUB TAB ============
+// ==================== ANALYZER CONTROLS ====================
+$('btnLock').addEventListener('click', () => lockTarget(false));
+$('btnClear').addEventListener('click', () => { S.target = null; S.history = []; saveState(); });
+$('btnBands').addEventListener('click', () => {
+  S.bandMode = S.bandMode === 3 ? 4 : 3; S.bands = S.bandMode === 3 ? BANDS3 : BANDS4;
+  $('btnBands').textContent = S.bandMode + '-Band';
+  if (S.target) S.target.bandLevels = allBandLevels(S.target.spectrum);
+  buildBands(); saveState();
+});
+$('btnAutoLock').addEventListener('click', () => {
+  S.autoLock = !S.autoLock;
+  $('btnAutoLock').textContent = 'Auto: ' + (S.autoLock ? 'ON' : 'OFF');
+  $('btnAutoLock').classList.toggle('on', S.autoLock);
+  saveState();
+});
 
-// ============ INIT ============
+// ==================== START ====================
+$('btnStart').addEventListener('click', async () => {
+  const ok = await startAudio();
+  if (ok) { $('overlay').style.display = 'none'; if (!A.bpmDetecting) { toggleBpmDetect(); } }
+});
+$('btnNoAudio').addEventListener('click', () => { $('overlay').style.display = 'none'; loadState(); });
+
+// ==================== INIT ====================
 buildBands();
 buildKeyGrid();
 calcDelay();
+tickClock();
+loadState();
+
+async function tryWakeLock() { try { if ('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch (e) {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && A.running) tryWakeLock(); });
 </script>
 </body>
 </html>
